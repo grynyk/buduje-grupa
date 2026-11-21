@@ -1,0 +1,10 @@
+// Cloudflare Workers — static assets only (the site is fully pre-rendered by Astro into dist/)
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "buduje-grupa",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}
