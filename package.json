@@ -4,10 +4,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "ASTRO_DEV_BACKGROUND=0 tinacms dev -c \"astro dev\"",
-    "dev:site": "astro dev",
+    "dev": "ASTRO_DEV_BACKGROUND=0 astro dev",
     "build": "astro build",
-    "build:cms": "tinacms build && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check"
@@ -22,12 +20,8 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
-    "@tinacms/cli": "^4.0.5",
     "@types/node": "^26.6.6",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
     "sass": "^1.108.2",
-    "tinacms": "^3.15.2",
     "typescript": "^6"
   }
 }

@@ -1,24 +1,23 @@
 # Buduje Grupa — website demo
 
-Marketing site for a construction company (general contractor), built with **Astro 7 + SCSS + TinaCMS + GSAP**. Content is in Polish.
+Marketing site for a construction company (general contractor), built with **Astro 7 + SCSS + Sveltia CMS + GSAP**. Content is in Polish.
 
 ## Quick start
 
 ```bash
 corepack enable          # once per machine (Yarn 4 via packageManager field)
 yarn install
-yarn dev                 # Astro on http://localhost:4321 + TinaCMS
+yarn dev                 # Astro on http://localhost:4321
 ```
 
 - Site: http://localhost:4321
-- CMS: http://localhost:4321/admin/index.html (local mode, edits write straight to `src/content/**`)
+- CMS: http://localhost:4321/admin/index.html → *Pracuj z lokalnym repozytorium* → pick the project folder
+  (Chrome/Edge; edits write straight to `src/content/**`, no login, nothing is committed)
 
 | Script           | What it does                                                         |
 | ---------------- | -------------------------------------------------------------------- |
-| `yarn dev`       | TinaCMS local server + `astro dev`                                   |
-| `yarn dev:site`  | Astro only (no CMS)                                                  |
-| `yarn build`     | Static build to `dist/` (no CMS admin)                               |
-| `yarn build:cms` | `tinacms build && astro build` — production build incl. `/admin`, needs TinaCloud env vars |
+| `yarn dev`       | `astro dev` (the CMS is a static page in `public/admin/`, nothing extra to run) |
+| `yarn build`     | Static build to `dist/`, including the CMS at `/admin/`              |
 | `yarn preview`   | Serve `dist/`                                                        |
 | `yarn check`     | Type-check `.astro` / `.ts` files                                    |
 
@@ -28,7 +27,7 @@ Yarn Berry with `nodeLinker: node-modules` (see `.yarnrc.yml`).
 
 Every main-menu item is its own page (nav order lives in `src/lib/nav.ts`):
 
-| URL | Source | Edit in Tina |
+| URL | Source | Edit in the CMS |
 | --- | --- | --- |
 | `/` | `src/content/pages/home.json` | Strona główna |
 | `/o-nas`, `/oferta`, `/katalog`, `/technologia`, `/proces-budowy`, `/poradnik-inwestora`, `/gwarancja`, `/finansowanie`, `/kontakt` | `src/content/site/<slug>.json` | Podstrony |
@@ -38,14 +37,14 @@ Every main-menu item is its own page (nav order lives in `src/lib/nav.ts`):
 **Podstrony** are built from reusable sections ("blocks"): an optional page header (4 layouts) plus any list of
 features, people, quote, media + text, packages, steps, big numbers, wall layers, FAQ, articles, payment schedule,
 estimate form, CTA band, catalog grid, contact (details + form) and map band. Add a new page by creating
-`src/content/site/<slug>.json` in Tina — it is served at `/<slug>` automatically (add it to `src/lib/nav.ts` to show it in the menu).
+`src/content/site/<slug>.json` (CMS → *Podstrony* → *Nowy*) — it is served at `/<slug>` automatically (add it to `src/lib/nav.ts` to show it in the menu).
 
-**Adding a realization** — Tina → *Realizacje* → *Create new*. The file name becomes the URL
+**Adding a realization** — CMS → *Realizacje* → *Nowa*. The file name becomes the URL
 (`dom-pod-lasem` → `/realizacje/dom-pod-lasem`). Fill name, category, location, year, area, duration, scope, short
 description, main photo, gallery and the story (rich text). *Wyróżniona* puts it in the home page row (first 3),
 *Kolejność* sets the order (also used for previous/next links).
 
-**Adding a catalog design** — Tina → *Katalog projektów* → *Create new*: area, rooms, floors, feature, main image,
+**Adding a catalog design** — CMS → *Katalog projektów* → *Nowy*: area, rooms, floors, feature, main image,
 optional visualisations (*Galeria*), floor plans (*Rzuty*, shown uncropped), *Co możemy zmienić* (empty = default list)
 and the description.
 
@@ -59,16 +58,16 @@ payment percentages (`[%]`), founders' roles (`[rola]`).
 ## Structure
 
 ```
-tina/config.ts              CMS schema (settings, home, site pages, catalog, projects, services)
-tina/blocks.ts              page-builder block templates
-src/content.config.ts       Astro collections — mirrors the Tina schema
+public/admin/index.html     Sveltia CMS (loaded from unpkg, pinned to 0.x)
+public/admin/config.yml     CMS schema: settings, home, sub-pages (page builder), catalog, projects
+src/content.config.ts       Astro collections (Zod) — mirrors the CMS schema
 src/content/
   settings/global.json      company name, phone, e-mail, address, socials + map
   pages/home.json           home-page copy
   site/*.json               the 9 sub-pages
   catalog/*.md              ready-made house designs
   projects/*.md             realizations
-  services/*.md             6 services (CMS only — not shown on the site right now)
+  services/*.md             6 services (not shown on the site, not in the CMS)
 src/assets/brand/           logo-wordmark.svg, logo-mark.svg (vector, currentColor)
 src/assets/icons/           brand social icons (Instagram, Facebook, YouTube, map pin)
 src/components/             Header, Footer, Logo, PageHero, ProjectCard, ContactForm, EstimateForm, SocialLinks, …
@@ -77,10 +76,12 @@ src/components/blocks/      page-builder blocks + BlockRenderer
 src/pages/                  /, /[slug], /realizacje/*, /katalog/[slug], 404
 src/styles/                 global.scss (tokens, base, buttons), _forms.scss, _abstracts.scss (mixins, auto-injected)
 src/scripts/                animations.ts (GSAP), web3forms.ts (form submit), filter.ts (pill filters)
-public/images/              photos (Tina media root)
+public/images/              photos (CMS media folder)
 ```
 
-When adding a field in `tina/config.ts` / `tina/blocks.ts`, add it to `src/content.config.ts` too.
+When adding a field in `public/admin/config.yml`, add it to `src/content.config.ts` too (and vice versa).
+CMS fields are required by default — mark optional ones `required: false` (empty optional fields are left out
+of the files, so Zod's `.optional()` / `.default()` apply).
 
 ## Brand
 
@@ -159,7 +160,7 @@ Strona główna → Opinie → Ocena.
 `/poradnik-inwestora` is a lead page: two forms (name + e-mail + consent) post to Web3Forms with the subject
 *Poradnik inwestora — prośba o PDF*, so every request lands in the company inbox. To deliver the PDF:
 
-1. Put the PDF in `public/poradnik/` (or upload it in Tina), e.g. `/poradnik/poradnik-inwestora.pdf`.
+1. Put the PDF in `public/poradnik/` (or upload it in the CMS: *Poradnik — formularz → Plik PDF*), e.g. `/poradnik/poradnik-inwestora.pdf`.
 2. **Automatic e-mail:** enable the *Autoresponder* in the Web3Forms dashboard (paid plan) with the PDF link in the
    message — the visitor gets it immediately. **Free alternative:** reply to each request from the inbox.
 3. Optional: set *Link do PDF* in the guide block — a "Pobierz poradnik teraz" link then appears right after sending.
@@ -170,13 +171,28 @@ The `map` block (`src/components/blocks/MapBand.astro`) shows an interactive Ope
 with **OpenFreeMap** vector tiles (free, no API key, no cookies), clean "Positron" style (change `STYLE` in `src/scripts/map.ts`). Licence: keep the "© OpenStreetMap contributors" credit visible.
 Position comes from *Ustawienia firmy → Położenie biura* (lat/lng). The library (~1 MB, gzip ~300 KB) is loaded only when
 the map scrolls into view; page scroll is never captured (Ctrl/⌘ + scroll or two fingers to move the map).
-Add it to any page as the *Mapa* section in Tina.
+Add it to any page as the *Mapa* section in the CMS.
 
-## Deploying with the CMS
+## CMS (Sveltia)
 
-1. Create a project on [TinaCloud](https://app.tina.io) connected to the Git repo.
-2. Set `PUBLIC_TINA_CLIENT_ID` and `TINA_TOKEN` in the host's env.
-3. Use `yarn build:cms` as the build command, output dir `dist`.
+[Sveltia CMS](https://sveltiacms.app/en/docs) is a free, Git-based editor at **`/admin/`** on the live site. Every save is a
+commit to `main` on GitHub → Cloudflare rebuilds → the change is live in ~1–2 min. No CMS service, keys or build step.
+
+Editors need a **GitHub account with write access** to `grynyk/buduje-grupa`
+(GitHub → repo → *Settings → Collaborators → Add people*). Two ways to sign in:
+
+- **Access token** (works right away, best for developers): *Zaloguj się za pomocą tokenu dostępu* → the dialog links
+  to GitHub with the right permissions pre-selected → paste the token.
+- **"Zaloguj się przez GitHub" button** (for the client): one-time setup of the free
+  [Sveltia CMS Authenticator](https://github.com/sveltia/sveltia-cms-auth) on Cloudflare:
+  1. Deploy it with the *Deploy to Cloudflare* button → note the URL `https://sveltia-cms-auth.<subdomain>.workers.dev`.
+  2. Register a GitHub App (link in that README), redirect URI `<worker URL>/callback`; copy the Client ID, create a
+     client secret; *Install App* → only `grynyk/buduje-grupa`.
+  3. Worker → *Settings → Variables and secrets*: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` (secret),
+     `ALLOWED_DOMAINS` = the site's hostname(s), e.g. `buduje-grupa.storyvoteapp.workers.dev, buduje-grupa.eu, www.buduje-grupa.eu`.
+  4. Uncomment `base_url` in `public/admin/config.yml` with the Worker URL, commit.
+
+**Pull before working locally** — CMS saves are commits on `main`.
 
 ## Placeholder content
 

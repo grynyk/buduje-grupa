@@ -2,7 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
-/** Schemas mirror tina/config.ts — keep both in sync when adding fields. */
+/** Schemas mirror the CMS config in public/admin/config.yml — keep both in sync when adding fields. */
 
 const link = z.object({ label: z.string(), href: z.string() });
 const intro = z.object({

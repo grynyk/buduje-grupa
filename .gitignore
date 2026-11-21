@@ -12,10 +12,6 @@ node_modules/
 !.yarn/versions
 .pnp.*
 
-# TinaCMS generated admin + local DB
-public/admin/
-tina/__generated__/
-
 # env
 .env
 .env.production
