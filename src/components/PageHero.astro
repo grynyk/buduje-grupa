@@ -1,0 +1,184 @@
+---
+/**
+ * Page header.
+ *  - split      (default) light: big title left, intro text right
+ *  - image-side light: text left, photo right
+ *  - image-bg   full-bleed photo with green shade
+ *  - dark       green block
+ */
+interface Props {
+  layout?: 'split' | 'image-side' | 'image-bg' | 'dark';
+  eyebrow?: string;
+  title: string;
+  text?: string;
+  image?: string;
+  imageAlt?: string;
+  crumbs?: { label: string; href?: string }[];
+}
+const { eyebrow, title, text, image, imageAlt = '', crumbs = [] } = Astro.props;
+const layout = Astro.props.layout ?? (image ? 'image-bg' : 'split');
+const dark = layout === 'image-bg' || layout === 'dark';
+---
+
+<section class:list={['page-hero', `page-hero--${layout}`, dark ? 'theme-dark' : 'theme-light']} data-hero>
+  {
+    layout === 'image-bg' && image && (
+      <div class="page-hero__media" data-hero-media>
+        <img src={image} alt="" width="1536" height="864" fetchpriority="high" />
+      </div>
+    )
+  }
+  <div class="container page-hero__inner">
+    <div class="page-hero__main">
+      {
+        crumbs.length > 0 && (
+          <nav aria-label="Okruszki" class="page-hero__crumbs" data-hero-fade>
+            <ol role="list">
+              {crumbs.map((c) => (
+                <li>{c.href ? <a href={c.href}>{c.label}</a> : <span aria-current="page">{c.label}</span>}</li>
+              ))}
+            </ol>
+          </nav>
+        )
+      }
+      {eyebrow && <p class="eyebrow page-hero__eyebrow" data-hero-fade>{eyebrow}</p>}
+      <h1 class="page-hero__title">
+        <span class="page-hero__line"><span data-hero-line>{title}</span></span>
+      </h1>
+      {layout === 'image-side' && text && <p class="page-hero__text" data-hero-fade>{text}</p>}
+      <slot />
+    </div>
+
+    {layout !== 'image-side' && text && <p class="page-hero__text" data-hero-fade>{text}</p>}
+
+    {
+      layout === 'image-side' && image && (
+        <figure class="page-hero__figure" data-hero-media>
+          <img src={image} alt={imageAlt} width="1536" height="864" fetchpriority="high" />
+        </figure>
+      )
+    }
+  </div>
+</section>
+
+<style lang="scss">
+  .page-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-top: calc(var(--header-h) + clamp(3.5rem, 7vw, 6.5rem));
+    padding-bottom: clamp(3rem, 5vw, 4.5rem);
+  }
+
+  .page-hero--image-bg {
+    min-height: min(70svh, 44rem);
+    display: flex;
+    align-items: flex-end;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(180deg, rgb(var(--shade) / 0.35), rgb(var(--shade) / 0.15) 40%, rgb(var(--shade) / 0.75));
+    }
+  }
+
+  .page-hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+
+    img {
+      @include cover-media;
+    }
+  }
+
+  .page-hero__inner {
+    display: grid;
+    gap: 1.5rem 4rem;
+
+    @include up(lg) {
+      grid-template-columns: 1.35fr 1fr;
+      align-items: end;
+    }
+  }
+
+  .page-hero--image-side .page-hero__inner {
+    @include up(lg) {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 4rem 6rem;
+    }
+  }
+
+  .page-hero__main {
+    display: grid;
+    gap: 1.5rem;
+    align-content: start;
+  }
+
+  .page-hero__crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    @include label;
+    color: var(--muted);
+
+    li + li::before {
+      content: '/';
+      margin-right: 0.5rem;
+      opacity: 0.5;
+    }
+
+    a {
+      @include hover {
+        color: var(--fg);
+      }
+    }
+  }
+
+  .page-hero__eyebrow {
+    margin-bottom: -0.25rem;
+  }
+
+  .page-hero__title {
+    @include display(var(--fs-h1));
+    line-height: 1.05;
+    max-width: 16ch;
+  }
+
+  .page-hero__line {
+    display: block;
+    overflow: hidden;
+    padding-block: 0.08em;
+    margin-block: -0.08em;
+
+    > span {
+      display: block;
+    }
+  }
+
+  .page-hero__text {
+    max-width: 30rem;
+    font-size: var(--fs-lead);
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  .theme-dark .page-hero__text {
+    color: rgb(255 255 255 / 0.82);
+  }
+
+  .page-hero__figure {
+    aspect-ratio: 4 / 3.7;
+    overflow: hidden;
+    background: var(--bg-alt);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+</style>

@@ -1,0 +1,151 @@
+---
+import type { BlockOf } from '@/content.config';
+
+type Props = BlockOf<'layers'>;
+const { eyebrow, items } = Astro.props;
+const total = items.reduce((sum, l) => sum + l.width, 0) || 1;
+// readable number colour on each stripe
+const isDark = (hex: string) => {
+  const m = hex.replace('#', '').match(/.{2}/g);
+  if (!m) return false;
+  const [r, g, b] = m.map((x) => parseInt(x, 16) / 255);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.45;
+};
+---
+
+<section class="section layers theme-light" data-layers>
+  <div class="container layers__grid">
+    <div class="layers__diagram" role="img" aria-label="Przekrój ściany domu szkieletowego — warstwy od wnętrza do elewacji">
+      {
+        items.map((l, i) => (
+          <span
+            class:list={['layers__stripe', { 'is-dark': isDark(l.color) }]}
+            style={`--w: ${(l.width / total) * 100}%; --c: ${l.color}`}
+            data-layer={i}
+          >
+            <span class="layers__stripe-num">{i + 1}</span>
+          </span>
+        ))
+      }
+    </div>
+
+    <div>
+      {eyebrow && <p class="eyebrow layers__eyebrow" data-reveal>{eyebrow}</p>}
+      <ol role="list" class="layers__list" data-reveal-stagger>
+        {
+          items.map((l, i) => (
+            <li class="layer" data-layer={i} tabindex="0">
+              <span class="layer__num">{i + 1}</span>
+              <div>
+                <h2 class="layer__name">{l.name}</h2>
+                {l.text && <p class="layer__text">{l.text}</p>}
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Hovering/focusing a list item highlights its stripe (and vice versa).
+  document.querySelectorAll<HTMLElement>('[data-layers]').forEach((root) => {
+    const all = root.querySelectorAll<HTMLElement>('[data-layer]');
+    const set = (i: string | null) => {
+      all.forEach((el) => {
+        el.classList.toggle('is-active', el.dataset.layer === i);
+        el.classList.toggle('is-dim', i !== null && el.dataset.layer !== i);
+      });
+    };
+    all.forEach((el) => {
+      el.addEventListener('mouseenter', () => set(el.dataset.layer ?? null));
+      el.addEventListener('focus', () => set(el.dataset.layer ?? null));
+      el.addEventListener('mouseleave', () => set(null));
+      el.addEventListener('blur', () => set(null));
+    });
+  });
+</script>
+
+<style lang="scss">
+  .layers__grid {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 8rem);
+
+    @include up(lg) {
+      grid-template-columns: minmax(16rem, 0.8fr) 1fr;
+      align-items: start;
+    }
+  }
+
+  .layers__diagram {
+    display: flex;
+    height: clamp(18rem, 32vw, 22rem);
+
+    @include up(lg) {
+      position: sticky;
+      top: calc(var(--header-h) + 2rem);
+    }
+  }
+
+  .layers__stripe {
+    position: relative;
+    flex: 0 0 var(--w);
+    background: var(--c);
+    transition: opacity 0.3s;
+  }
+
+  .layers__stripe-num {
+    position: absolute;
+    left: 50%;
+    bottom: 0.75rem;
+    transform: translateX(-50%);
+    font-size: 0.6875rem;
+    color: var(--c-green);
+  }
+
+  .layers__stripe.is-dark .layers__stripe-num {
+    color: var(--c-white);
+  }
+
+  .layers__stripe.is-dim {
+    opacity: 0.35;
+  }
+
+  .layers__eyebrow {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .layer {
+    display: grid;
+    grid-template-columns: 1.5rem 1fr;
+    gap: 0.5rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--line);
+    cursor: default;
+    outline-offset: -1px;
+    transition: background 0.3s;
+  }
+
+  .layer.is-active {
+    background: var(--c-paper);
+  }
+
+  .layer__num {
+    @include display(1.25rem);
+    font-weight: 200;
+    line-height: 1.1;
+  }
+
+  .layer__name {
+    @include label;
+    font-size: 0.75rem;
+  }
+
+  .layer__text {
+    margin-top: 0.25rem;
+    font-size: var(--fs-small);
+    color: var(--muted);
+  }
+</style>

@@ -1,0 +1,207 @@
+---
+/**
+ * Feature list.
+ *  grid  — heading on top, items in columns (O nas, Finansowanie)
+ *  split — 12-col: heading + intro + link left (sticky), 2×2 benefit cells right with icons (Technologia)
+ */
+import type { BlockOf } from '@/content.config';
+import Icon from '@/components/Icon.astro';
+import { pad } from '@/lib/content';
+
+type Props = BlockOf<'features'>;
+const { eyebrow, title, text, items, numbered, columns, theme, layout, link } = Astro.props;
+type IconName = Parameters<typeof Icon>[0]['name'];
+const split = layout === 'split';
+---
+
+<section class:list={['section features', `theme-${theme}`, { 'features--split': split }]}>
+  <div class="container features__wrap">
+    {
+      (eyebrow || title || text) && (
+        <header class="features__head">
+          {eyebrow && <p class="eyebrow" data-reveal>{eyebrow}</p>}
+          {title && <h2 class="display features__title" data-split>{title}</h2>}
+          {text && <p class="lead" data-reveal>{text}</p>}
+          {link && (
+            <a href={link.href} class="link-arrow features__link" data-reveal>
+              {link.label} <Icon name="arrow-right" />
+            </a>
+          )}
+        </header>
+      )
+    }
+    <ul role="list" class="features__grid" style={`--cols: ${columns}`} data-reveal-stagger>
+      {
+        items.map((item, i) => (
+          <li class="feature">
+            {(item.icon || (split && numbered)) && (
+              <div class="feature__top">
+                {item.icon && (
+                  <span class="feature__icon" aria-hidden="true">
+                    <Icon name={item.icon as IconName} />
+                  </span>
+                )}
+                {split && numbered && <span class="feature__index">{pad(i + 1)}</span>}
+              </div>
+            )}
+            {!split && numbered && <span class="feature__num">{pad(i + 1)}</span>}
+            <h3 class="feature__title">{item.title}</h3>
+            {item.text && <p class="feature__text">{item.text}</p>}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style lang="scss">
+  .features__head {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 44rem;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+  }
+
+  .features__grid {
+    display: grid;
+    gap: 2.5rem clamp(1.5rem, 2.5vw, 2rem);
+
+    @include up(md) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @include up(lg) {
+      grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+    }
+  }
+
+  .feature {
+    display: grid;
+    gap: 0.75rem;
+    align-content: start;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .feature__num {
+    @include display(clamp(2.25rem, 1.8rem + 1.5vw, 3rem));
+    font-weight: 200;
+    line-height: 1;
+  }
+
+  .feature__title {
+    @include label;
+    font-size: 0.75rem;
+  }
+
+  .feature__text {
+    color: var(--muted);
+    font-size: var(--fs-small);
+    max-width: 36ch;
+  }
+
+  /* ================= split layout ================= */
+  .features--split {
+    .features__wrap {
+      display: grid;
+      gap: 3rem clamp(1rem, 1.6vw, 1.5rem);
+
+      @include up(lg) {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        align-items: start;
+      }
+    }
+
+    .features__head {
+      margin-bottom: 0;
+
+      @include up(lg) {
+        grid-column: 1 / span 5;
+        position: sticky;
+        top: calc(var(--header-h) + 3rem);
+        padding-right: clamp(0rem, 3vw, 3rem);
+      }
+    }
+
+    .features__title {
+      max-width: 14ch;
+    }
+
+    .features__link {
+      justify-self: start;
+      margin-top: 0.5rem;
+    }
+
+    // 2×2 cells separated by hairlines (outer frame top/bottom only)
+    .features__grid {
+      gap: 0;
+      border-top: 1px solid var(--line);
+
+      @include up(md) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      @include up(lg) {
+        grid-column: 7 / -1;
+      }
+    }
+
+    .feature {
+      gap: 1rem;
+      padding: clamp(1.75rem, 3vw, 2.5rem) 0;
+      border-top: 0;
+      border-bottom: 1px solid var(--line);
+
+      @include up(md) {
+        padding-inline: clamp(1.25rem, 2.5vw, 2rem);
+
+        &:nth-child(odd) {
+          padding-left: 0;
+          border-right: 1px solid var(--line);
+        }
+
+        &:nth-child(even) {
+          padding-right: 0;
+        }
+      }
+    }
+
+    .feature__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature__icon {
+      display: grid;
+      place-items: center;
+      width: 3.25rem;
+      height: 3.25rem;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      color: var(--accent);
+
+      :global(.icon) {
+        width: 1.375rem;
+        height: 1.375rem;
+        stroke-width: 1.25;
+      }
+    }
+
+    .feature__index {
+      @include label;
+      color: var(--muted);
+    }
+
+    .feature__title {
+      @include display(var(--fs-h3));
+      text-transform: none;
+      letter-spacing: -0.01em;
+    }
+
+    .feature__text {
+      max-width: 34ch;
+    }
+  }
+</style>

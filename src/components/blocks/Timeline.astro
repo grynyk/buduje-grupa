@@ -1,0 +1,359 @@
+---
+/**
+ * Detailed process: sticky step index (left, desktop) + one detailed panel per step (right).
+ *
+ *  ┌ cols 1–3 (sticky) ┐ ┌──────────── cols 4–12 ────────────┐
+ *  │ ● 01 Konsultacja  │ │ 01  Konsultacja        [1–2 tyg.] │
+ *  │ │ 02 Projekt      │ │ text                              │
+ *  │ │ 03 Formalności  │ │ Po naszej │ Po Twojej │ Efekt     │
+ *  │ …  (rail fills)   │ ├───────────────────────────────────┤
+ *  └───────────────────┘ │ 02 …                              │
+ */
+import type { BlockOf } from '@/content.config';
+import Icon from '@/components/Icon.astro';
+import { pad } from '@/lib/content';
+
+type Props = BlockOf<'timeline'>;
+const { eyebrow, items, weLabel, youLabel, resultLabel } = Astro.props;
+const id = (i: number) => `krok-${i + 1}`;
+---
+
+<section class="timeline theme-light" data-timeline>
+  <div class="container timeline__grid">
+    <nav class="timeline__index" aria-label="Etapy procesu">
+      {eyebrow && <p class="eyebrow timeline__eyebrow">{eyebrow}</p>}
+      <ol role="list" class="timeline__index-list">
+        <span class="timeline__rail" aria-hidden="true"><span data-timeline-progress></span></span>
+        {
+          items.map((s, i) => (
+            <li>
+              <a href={`#${id(i)}`} class:list={['timeline__index-link', { 'is-active': i === 0 }]} data-timeline-link={i}>
+                <span class="timeline__dot" aria-hidden="true" />
+                <span class="timeline__index-num">{pad(i + 1)}</span>
+                <span class="timeline__index-title">{s.title}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <ol role="list" class="timeline__steps">
+      {
+        items.map((s, i) => (
+          <li class="tstep" id={id(i)} data-timeline-step={i}>
+            <span class="tstep__num" aria-hidden="true">
+              {pad(i + 1)}
+            </span>
+            <div class="tstep__body">
+              <header class="tstep__head">
+                <h2 class="tstep__title">
+                  <span class="sr-only">Krok {i + 1}: </span>
+                  {s.title}
+                </h2>
+                {s.duration && (
+                  <span class="tstep__duration">
+                    <Icon name="clock" />
+                    {s.duration}
+                  </span>
+                )}
+              </header>
+
+              {s.text && <p class="tstep__text">{s.text}</p>}
+
+              <div class="tstep__cols">
+                {s.we.length > 0 && (
+                  <div class="tstep__col">
+                    <h3 class="tstep__label">{weLabel}</h3>
+                    <ul role="list" class="tstep__list">
+                      {s.we.map((t) => (
+                        <li>
+                          <Icon name="check" />
+                          {t}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {s.you.length > 0 && (
+                  <div class="tstep__col">
+                    <h3 class="tstep__label">{youLabel}</h3>
+                    <ul role="list" class="tstep__list">
+                      {s.you.map((t) => (
+                        <li>
+                          <Icon name="arrow-right" />
+                          {t}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {s.result && (
+                  <div class="tstep__col tstep__result">
+                    <h3 class="tstep__label">{resultLabel}</h3>
+                    <p>{s.result}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<script>
+  // Scroll-spy: highlight the step currently in view in the sticky index.
+  document.querySelectorAll<HTMLElement>('[data-timeline]').forEach((root) => {
+    const links = [...root.querySelectorAll<HTMLAnchorElement>('[data-timeline-link]')];
+    const steps = [...root.querySelectorAll<HTMLElement>('[data-timeline-step]')];
+    const setActive = (i: number) =>
+      links.forEach((l, j) => {
+        l.classList.toggle('is-active', j === i);
+        l.classList.toggle('is-done', j < i);
+        if (j === i) l.setAttribute('aria-current', 'step');
+        else l.removeAttribute('aria-current');
+      });
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset.timelineStep));
+        });
+      },
+      // a step becomes "current" when it crosses the upper third of the viewport
+      { rootMargin: '-30% 0px -65% 0px' },
+    );
+    steps.forEach((s) => io.observe(s));
+  });
+</script>
+
+<style lang="scss">
+  .timeline {
+    padding-bottom: var(--section-y);
+  }
+
+  .timeline__grid {
+    display: grid;
+    gap: 2rem clamp(1rem, 1.6vw, 1.5rem);
+
+    @include up(lg) {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: start;
+    }
+  }
+
+  /* ---------- sticky index ---------- */
+  .timeline__index {
+    display: none;
+
+    @include up(lg) {
+      display: block;
+      grid-column: 1 / span 3;
+      position: sticky;
+      top: calc(var(--header-h) + 2.5rem);
+    }
+  }
+
+  .timeline__eyebrow {
+    margin-bottom: 1.25rem;
+  }
+
+  .timeline__index-list {
+    position: relative;
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  // vertical rail behind the dots; green part = progress through the page
+  .timeline__rail {
+    position: absolute;
+    top: 1.1rem;
+    bottom: 1.1rem;
+    left: 0.3125rem;
+    width: 1px;
+    background: var(--line);
+
+    span {
+      position: absolute;
+      inset: 0;
+      background: var(--c-green);
+      transform-origin: top;
+      transform: scaleY(0);
+    }
+  }
+
+  .timeline__index-link {
+    position: relative;
+    display: grid;
+    grid-template-columns: 0.625rem 2rem 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    padding-block: 0.6rem;
+    color: var(--muted);
+    transition: color 0.3s;
+
+    @include hover {
+      color: var(--fg);
+    }
+
+    &.is-active,
+    &.is-done {
+      color: var(--fg);
+    }
+  }
+
+  .timeline__dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    background: var(--bg);
+    transition:
+      background 0.3s,
+      transform 0.3s var(--ease-out);
+  }
+
+  .is-active .timeline__dot,
+  .is-done .timeline__dot {
+    background: var(--c-green);
+    border-color: var(--c-green);
+  }
+
+  .is-active .timeline__dot {
+    transform: scale(1.3);
+  }
+
+  .timeline__index-num {
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .timeline__index-title {
+    @include label;
+    font-size: 0.75rem;
+  }
+
+  /* ---------- step panels ---------- */
+  .timeline__steps {
+    @include up(lg) {
+      grid-column: 4 / -1;
+    }
+  }
+
+  // Two columns: number | everything else. Title, text and the three columns share one left edge.
+  .tstep {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: first baseline; // number sits on the title's baseline
+    column-gap: clamp(1rem, 2vw, 1.75rem);
+    padding-block: clamp(2rem, 3.5vw, 3rem);
+    border-top: 1px solid var(--line);
+    scroll-margin-top: calc(var(--header-h) + 1.5rem);
+
+    &:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+  }
+
+  .tstep__num {
+    @include display(clamp(2.25rem, 1.8rem + 2vw, 3.75rem));
+    font-weight: 200;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tstep__body {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .tstep__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+  }
+
+  .tstep__title {
+    @include display(clamp(1.5rem, 1.25rem + 1vw, 2.25rem));
+  }
+
+  .tstep__duration {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    border: 1px solid var(--line);
+    border-radius: 99px;
+
+    :global(.icon) {
+      width: 0.875rem;
+      height: 0.875rem;
+      stroke-width: 1.5;
+    }
+  }
+
+  .tstep__text {
+    max-width: 44rem;
+    font-size: var(--fs-lead);
+    color: var(--muted);
+  }
+
+  .tstep__cols {
+    display: grid;
+    gap: 1rem;
+
+    @include up(md) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .tstep__col {
+    display: grid;
+    gap: 0.75rem;
+    align-content: start;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .tstep__label {
+    @include label;
+    color: var(--muted);
+  }
+
+  .tstep__list {
+    display: grid;
+    gap: 0.55rem;
+    font-size: var(--fs-small);
+
+    li {
+      display: flex;
+      gap: 0.6rem;
+      align-items: flex-start;
+    }
+
+    :global(.icon) {
+      flex: none;
+      width: 0.875rem;
+      height: 0.875rem;
+      margin-top: 0.2rem;
+      stroke-width: 1.5;
+    }
+  }
+
+  .tstep__result {
+    padding: 1rem 1.1rem 1.1rem;
+    background: var(--c-paper);
+    border-top-color: var(--c-green);
+
+    p {
+      font-size: var(--fs-small);
+    }
+  }
+</style>

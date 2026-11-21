@@ -1,0 +1,63 @@
+{
+  "companyName": "BUDUJE GRUPA",
+  "legalName": "BUDUJE-GRUPA Sp. z o.o.",
+  "tagline": "Domy całoroczne w konstrukcji szkieletowej, drewnianej — od analizy działki i płyty fundamentowej po stan deweloperski lub dom pod klucz.",
+  "phone": "+48 790 882 167",
+  "email": "architektura@buduje-grupa.eu",
+  "address": "ul. Krasowa 32/6",
+  "city": "32-065 Krzeszowice",
+  "hours": "Pon–Sob 9:00–18:00",
+  "nip": "NIP 5130304103 · KRS 0001183583 · REGON 542222011",
+  "socials": [
+    {
+      "label": "Instagram",
+      "url": "https://www.instagram.com/buduje_grupa/",
+      "icon": "instagram"
+    },
+    {
+      "label": "Facebook",
+      "url": "#",
+      "icon": "facebook"
+    },
+    {
+      "label": "YouTube",
+      "url": "#",
+      "icon": "youtube"
+    },
+    {
+      "label": "Google Maps",
+      "url": "https://www.google.com/maps/place/BUDUJE-GRUPA+Sp.+z+o.o.+Domy+ca%C5%82oroczne+w+konstrukcji+szkieletowej,+drewnianej./@50.1347824,19.6485655,204m/data=!3m2!1e3!4b1!4m6!3m5!1s0x4716f1293ab6a1ef:0x1cf1f0959f56f3c0!8m2!3d50.1347815!4d19.6492092!16s%2Fg%2F11mzf1h80r",
+      "icon": "map"
+    }
+  ],
+  "prefooter": {
+    "quote": {
+      "title": "„Budujemy tak, jakbyśmy budowali dla siebie.”",
+      "button": {
+        "label": "Poznajmy się",
+        "href": "/kontakt"
+      }
+    },
+    "visit": {
+      "title": "Chcesz zobaczyć dom na żywo?",
+      "text": "Umówimy wizytę na budowie lub w zamieszkanym już domu.",
+      "button": {
+        "label": "Umów wizytę",
+        "href": "/kontakt"
+      }
+    },
+    "custom": {
+      "title": "Nie znalazłeś swojego domu?",
+      "text": "Zaprojektujemy go od zera — razem z Tobą.",
+      "button": {
+        "label": "Projekt indywidualny",
+        "href": "/kontakt"
+      }
+    }
+  },
+  "openingHours": "Mo-Sa 09:00-18:00",
+  "geo": {
+    "lat": 50.1347815,
+    "lng": 19.6492092
+  }
+}

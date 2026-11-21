@@ -1,0 +1,437 @@
+/* Fonts are imported in BaseLayout.astro (keeps their relative url() paths intact). */
+@use 'forms';
+
+/* ============ Tokens ============ */
+:root {
+  // ---- brand palette (BUDUJE GRUPA brand files) — the only colours used on the site ----
+  --c-green: #063424; // forest green: ink, primary actions, dark sections
+  --c-green-2: #0b402d; // green, one step lighter: hover / raised surface on green
+  --c-paper: #f6f4f0; // warm off-white: containers, cards, bands
+  --c-paper-2: #edede8;
+  --c-sage: #dbe0d9; // cool soft surface: testimonials, map
+  --c-sage-dark: #8c9e94; // quiet detail on green (secondary text)
+  --c-wood: #dbbd8c; // timber — warm detail on light backgrounds only (reads as gold on green)
+  --c-wood-2: #c7a87a; // timber accent, deeper (decorative marks)
+  --c-bark: #5c4533; // timber accent on light backgrounds (AA on white & sage)
+  --c-white: #ffffff; // page
+
+  // ---- colour roles ----
+  // white = page · paper (beige) = containers · sage = testimonials & map · green = ink / action / dark section
+  // wood & bark = warm accent
+  // Text tints are the brand green (or white on green) at reduced opacity, so everything stays on-palette.
+
+  // light section (default)
+  --bg: var(--c-white);
+  --bg-alt: var(--c-paper);
+  --fg: var(--c-green);
+  --muted: rgb(6 52 36 / 0.72); // ≈5.8:1 on white, ≈5.5:1 on paper, ≈4.9:1 on sage
+  --line: rgb(6 52 36 / 0.14);
+  --accent: var(--c-bark); // section labels, numbers, active marks
+  --action: var(--c-green); // primary button
+  --action-fg: var(--c-white);
+  --action-sweep: var(--c-green-2); // button hover fill
+  --action-sweep-fg: var(--c-white);
+  --field-bg: var(--c-white);
+  --success: var(--c-green);
+  --danger: #b3261e; // form errors only (functional, not brand)
+
+  // photo overlays
+  --shade: 3 30 21; // rgb triplet, use as rgb(var(--shade) / a)
+
+  // type — Jost Light for headings, Archivo for text/labels
+  --f-display: 'Jost Variable', 'Jost', system-ui, sans-serif;
+  --f-body: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --fs-hero: clamp(3rem, 1.2rem + 6.6vw, 7.5rem);
+  --fs-h1: clamp(2.5rem, 1.5rem + 3.6vw, 4.75rem);
+  --fs-h2: clamp(2rem, 1.35rem + 2.4vw, 3.5rem);
+  --fs-h3: clamp(1.375rem, 1.2rem + 0.6vw, 1.75rem);
+  --fs-lead: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --fs-body: 0.9375rem;
+  --fs-small: 0.8125rem;
+  --fs-label: 0.6875rem;
+
+  // layout
+  --container: 1440px;
+  --gutter: clamp(1rem, 4.5vw, 4.5rem);
+  --section-y: clamp(4.5rem, 3rem + 5vw, 8rem);
+  --header-h: 5rem;
+  --radius: 0;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+// green section: white ink, sage accent (tonal — wood read as gold on green), white button that fills with sage on hover
+.theme-dark {
+  --bg: var(--c-green);
+  --bg-alt: var(--c-green-2);
+  --fg: var(--c-white);
+  --muted: rgb(255 255 255 / 0.72);
+  --line: rgb(255 255 255 / 0.18);
+  --accent: var(--c-sage);
+  --action: var(--c-white);
+  --action-fg: var(--c-green);
+  --action-sweep: var(--c-sage);
+  --action-sweep-fg: var(--c-green);
+  --field-bg: rgb(255 255 255 / 0.06);
+  --success: var(--c-sage);
+  --danger: #ffab9f;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.theme-light {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+// beige (paper) section: same ink as light; cards inside go white
+.theme-paper {
+  --bg: var(--c-paper);
+  --bg-alt: var(--c-white);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+// sage section (testimonials, map): slightly stronger hairlines
+.theme-sage {
+  --bg: var(--c-sage);
+  --bg-alt: var(--c-white);
+  --line: rgb(6 52 36 / 0.18);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* ============ Reset ============ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: var(--header-h);
+
+  @include motion-ok {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  min-height: 100svh;
+  font-family: var(--f-body);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+  padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+::selection {
+  background: var(--c-sage);
+  color: var(--c-green);
+}
+
+:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ============ Layout helpers ============ */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: var(--section-y);
+  position: relative;
+}
+
+.eyebrow {
+  @include eyebrow;
+}
+
+.label {
+  @include label;
+}
+
+.display {
+  @include display(var(--fs-h2));
+}
+
+.lead {
+  font-size: var(--fs-lead);
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.sr-only {
+  @include visually-hidden;
+}
+
+.skip-link {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1000;
+  padding: 0.75rem 1.25rem;
+  background: var(--c-green);
+  color: var(--c-white);
+  @include label;
+  transform: translateY(-200%);
+  transition: transform 0.2s;
+
+  &:focus {
+    transform: none;
+  }
+}
+
+/* ============ Buttons ============ */
+// Square, small uppercase. Colours follow the section theme:
+// green on light sections, white on green ones.
+.btn {
+  --btn-bg: var(--action);
+  --btn-fg: var(--action-fg);
+  --btn-border: var(--action);
+  --btn-sweep: var(--action-sweep);
+  --btn-sweep-fg: var(--action-sweep-fg);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 3rem;
+  padding: 0 1.75rem;
+  font-family: var(--f-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--btn-fg);
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    color 0.4s var(--ease-out),
+    border-color 0.4s var(--ease-out);
+
+  // fill sweep
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--btn-sweep);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.45s var(--ease-out);
+  }
+
+  @include hover {
+    color: var(--btn-sweep-fg);
+    border-color: var(--btn-sweep);
+
+    &::before {
+      transform: scaleY(1);
+    }
+  }
+
+  &--ghost {
+    --btn-bg: transparent;
+    --btn-fg: var(--fg);
+    --btn-border: var(--fg);
+    --btn-sweep: var(--fg);
+    --btn-sweep-fg: var(--bg);
+  }
+
+  &--block {
+    width: 100%;
+  }
+
+  &[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+// "ZOBACZ PROJEKT →"
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  @include label;
+  color: var(--fg);
+  padding-bottom: 0.3rem;
+  background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0 1px;
+  transition: background-size 0.45s var(--ease-out);
+
+  .icon {
+    width: 0.875rem;
+    height: 0.875rem;
+    stroke-width: 1.5;
+    transition: transform 0.45s var(--ease-out);
+  }
+
+  @include hover {
+    background-size: 100% 1px;
+
+    .icon {
+      transform: translateX(3px);
+    }
+  }
+}
+
+// Pill filters / chips
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: transparent;
+  transition:
+    background 0.3s,
+    color 0.3s,
+    border-color 0.3s;
+
+  &.is-active,
+  &[aria-pressed='true'] {
+    background: var(--c-green);
+    border-color: var(--c-green);
+    color: var(--c-white);
+  }
+}
+
+/* ============ Prose (CMS rich text) ============ */
+.prose {
+  font-size: var(--fs-lead);
+  line-height: 1.7;
+  max-width: 68ch;
+
+  > * + * {
+    margin-top: 1.25em;
+  }
+
+  h2,
+  h3 {
+    @include display(clamp(1.5rem, 1.25rem + 0.9vw, 2rem));
+    margin-top: 2em;
+  }
+
+  ul,
+  ol {
+    padding-left: 1.25em;
+  }
+
+  li + li {
+    margin-top: 0.4em;
+  }
+
+  li::marker {
+    color: var(--accent);
+  }
+
+  strong {
+    font-weight: 600;
+  }
+
+  a {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+}
+
+/* ============ Animation pre-states ============
+   `.js` is set inline in <head>; `.no-anim` is set when motion is reduced
+   or as a failsafe if the animation bundle never runs. */
+html.js:not(.no-anim) {
+  [data-reveal],
+  [data-reveal-stagger] > * {
+    opacity: 0;
+  }
+
+  [data-split] {
+    visibility: hidden;
+  }
+
+  [data-hero-line] {
+    opacity: 0;
+  }
+
+  [data-hero-fade],
+  [data-hero-badge] {
+    opacity: 0;
+  }
+}

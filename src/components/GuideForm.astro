@@ -1,0 +1,71 @@
+---
+/**
+ * "Odbierz poradnik" form (Web3Forms): name + e-mail + consent.
+ * The submission reaches the company inbox with the subject "Poradnik inwestora — …".
+ * Sending the PDF to the visitor: Web3Forms autoresponder (Pro) or a reply from the inbox — see README.
+ * If `pdf` is set, a download link appears after a successful send as a backup.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  id: string;
+  buttonLabel?: string;
+  note?: string;
+  pdf?: string;
+}
+const { id, buttonLabel = 'Odbieram bezpłatny poradnik', note, pdf } = Astro.props;
+const accessKey = import.meta.env.PUBLIC_WEB3FORMS_KEY;
+---
+
+<form
+  class="form guide-form"
+  action="https://api.web3forms.com/submit"
+  method="POST"
+  novalidate
+  data-web3form
+  data-success="Dziękujemy! Poradnik wyślemy na podany adres e-mail."
+>
+  <input type="hidden" name="access_key" value={accessKey} />
+  <input type="hidden" name="subject" value="Poradnik inwestora — prośba o PDF (buduje-grupa.eu)" />
+  <input type="hidden" name="from_name" value="BUDUJE GRUPA — poradnik" />
+  <input type="hidden" name="temat" value="Poradnik inwestora (PDF)" />
+  <input type="checkbox" name="botcheck" class="form__hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+  <div class="form__grid">
+    <div class="field">
+      <label for={`${id}-name`} class="form__label">Imię *</label>
+      <input id={`${id}-name`} name="name" type="text" autocomplete="given-name" placeholder="Jan" required minlength="2" />
+      <p class="field__error" data-error-for="name">Podaj imię.</p>
+    </div>
+    <div class="field">
+      <label for={`${id}-email`} class="form__label">E-mail *</label>
+      <input id={`${id}-email`} name="email" type="email" autocomplete="email" placeholder="twoj@email.pl" required />
+      <p class="field__error" data-error-for="email">Podaj poprawny adres e-mail.</p>
+    </div>
+  </div>
+
+  <label class="consent">
+    <input type="checkbox" name="consent" value="Tak" required />
+    <span class="consent__box" aria-hidden="true"><Icon name="check" /></span>
+    <span class="consent__text">Wyrażam zgodę na przetwarzanie moich danych w celu przesłania poradnika. *</span>
+  </label>
+  <p class="field__error" data-error-for="consent">Zgoda jest wymagana, abyśmy mogli wysłać poradnik.</p>
+
+  <div class="form__footer">
+    <button type="submit" class="btn form__submit" data-submit><span data-submit-label>{buttonLabel}</span></button>
+    <p class="form__status" role="status" aria-live="polite" data-status></p>
+    {
+      pdf && (
+        <a href={pdf} class="link-arrow guide-form__download" download hidden data-download>
+          Pobierz poradnik teraz <Icon name="arrow-down" />
+        </a>
+      )
+    }
+    {note && <p class="form__note">{note}</p>}
+  </div>
+</form>
+
+<script>
+  import { initWeb3Forms } from '@/scripts/web3forms';
+  initWeb3Forms();
+</script>

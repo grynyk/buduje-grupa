@@ -1,0 +1,32 @@
+{
+  "seo": {
+    "title": "Kontakt — porozmawiajmy o Twoim domu | BUDUJE GRUPA",
+    "description": "Umów konsultację — w biurze, na Twojej działce lub online."
+  },
+  "prefooter": "none",
+  "blocks": [
+    {
+      "_template": "contact",
+      "eyebrow": "Kontakt",
+      "title": "Porozmawiajmy o Twoim domu.",
+      "text": "Najlepiej zacząć od krótkiej rozmowy. Odpowiemy na pytania i umówimy konsultację — u nas, na Twojej działce lub online.",
+      "formTitle": "Napisz do nas",
+      "choicesLabel": "Temat",
+      "note": "Odpowiadamy najszybciej, jak to możliwe.",
+      "choices": [
+        "Budowa domu szkieletowego",
+        "Płyta fundamentowa / piwnica",
+        "Adaptacja projektu",
+        "Pozwolenia i formalności",
+        "Wycena",
+        "Projekt wnętrz",
+        "Finansowanie i kredyt",
+        "Wizyta na budowie",
+        "Inne"
+      ]
+    },
+    {
+      "_template": "map"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+---
+import type { BlockOf } from '@/content.config';
+import Icon from '@/components/Icon.astro';
+
+type Props = BlockOf<'articles'>;
+const { eyebrow, items, theme } = Astro.props;
+---
+
+<section class:list={['section articles', `theme-${theme}`]}>
+  <div class="container">
+    {eyebrow && <p class="eyebrow articles__eyebrow" data-reveal>{eyebrow}</p>}
+    <ul role="list" class="articles__grid" data-reveal-stagger>
+      {
+        items.map((a) => (
+          <li class="article">
+            <h3 class="article__title">{a.title}</h3>
+            {a.text && <p class="article__text">{a.text}</p>}
+            {a.href && (
+              <a href={a.href} class="link-arrow article__link">
+                Czytaj <Icon name="arrow-right" />
+                <span class="sr-only">: {a.title}</span>
+              </a>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style lang="scss">
+  .articles__eyebrow {
+    margin-bottom: 2rem;
+  }
+
+  .articles__grid {
+    display: grid;
+    gap: 1rem;
+
+    @include up(md) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .article {
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+    padding: 1.5rem 1.25rem;
+    background: var(--bg-alt);
+  }
+
+  .article__title {
+    @include display(1.25rem);
+  }
+
+  .article__text {
+    font-size: var(--fs-small);
+    color: var(--muted);
+  }
+
+  .article__link {
+    justify-self: start;
+    margin-top: 0.25rem;
+  }
+</style>

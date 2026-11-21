@@ -1,0 +1,38 @@
+---
+/** Sticky "ask about this" box shown beside the description on detail pages. */
+interface Props {
+  title: string;
+  text?: string;
+  href: string;
+  label: string;
+}
+const { title, text, href, label } = Astro.props;
+---
+
+<aside class="ask">
+  <p class="ask__title">{title}</p>
+  {text && <p class="ask__text">{text}</p>}
+  <a href={href} class="btn">{label}</a>
+  <slot />
+</aside>
+
+<style lang="scss">
+  .ask {
+    display: grid;
+    gap: 0.9rem;
+    justify-items: start;
+    padding: clamp(1.5rem, 2.5vw, 2rem);
+    background: var(--c-paper);
+    // the page's aside column is the sticky element
+  }
+
+  .ask__title {
+    @include display(var(--fs-h3));
+  }
+
+  .ask__text {
+    font-size: var(--fs-small);
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+</style>

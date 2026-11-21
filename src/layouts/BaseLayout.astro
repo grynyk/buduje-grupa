@@ -1,0 +1,101 @@
+---
+import '@fontsource-variable/jost/index.css';
+import '@fontsource-variable/archivo/index.css';
+import '@/styles/global.scss';
+
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import PreFooter from '@/components/PreFooter.astro';
+import type { PrefooterVariant } from '@/content.config';
+import { getSettings } from '@/lib/content';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  /** overlay: transparent header over a photo/green hero; solid: white bar from the start */
+  header?: 'overlay' | 'solid';
+  /** Beige band above the footer. Default: "quote" on every page except home (none). */
+  prefooter?: PrefooterVariant;
+}
+
+const settings = await getSettings();
+const { title, description = settings.tagline, image = '/images/wiezba-dachowa.jpg', header = 'overlay' } = Astro.props;
+const isHome = Astro.url.pathname.replace(/\/+$/, '') === '';
+const prefooter = Astro.props.prefooter ?? (isHome ? 'none' : 'quote');
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(image, Astro.site);
+
+// Local business structured data (matches the Google Maps listing)
+const [postalCode, ...locality] = (settings.city ?? '').split(' ');
+const sameAs = settings.socials.map((s) => s.url).filter((u) => /^https?:\/\//.test(u));
+const business = {
+  '@context': 'https://schema.org',
+  '@type': 'HomeAndConstructionBusiness',
+  name: settings.legalName ?? settings.companyName,
+  description: settings.tagline,
+  url: Astro.site?.toString(),
+  image: new URL('/images/dom-stodola.jpg', Astro.site).toString(),
+  telephone: settings.phone?.replace(/\s+/g, ''),
+  email: settings.email,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: settings.address,
+    postalCode,
+    addressLocality: locality.join(' '),
+    addressCountry: 'PL',
+  },
+  ...(settings.geo && { geo: { '@type': 'GeoCoordinates', latitude: settings.geo.lat, longitude: settings.geo.lng } }),
+  ...(settings.openingHours && { openingHours: settings.openingHours }),
+  ...(sameAs.length && { sameAs }),
+};
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#063424" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:site_name" content={settings.companyName} />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(business)} />
+
+    <!-- Animation pre-state: hide reveal targets only when JS + motion are available.
+         Failsafe un-hides everything if the animation bundle hasn't started in 2.5s. -->
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js');
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('no-anim');
+        window.__animFailsafe = setTimeout(function () {
+          d.classList.add('no-anim');
+        }, 2500);
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Przejdź do treści</a>
+    <Header settings={settings} variant={header} />
+    <main id="main">
+      <slot />
+      {prefooter !== 'none' && <PreFooter variant={prefooter} />}
+    </main>
+    <Footer settings={settings} wordmark={isHome} />
+
+    <script>
+      import { initAnimations } from '@/scripts/animations';
+      initAnimations();
+    </script>
+  </body>
+</html>

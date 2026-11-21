@@ -1,0 +1,182 @@
+---
+/**
+ * Closing "commitment" section: photo + promises, sealed with a quote and the next step.
+ *
+ *  ┌ cols 1–5 ───────┐   ┌ cols 7–12 ─────────────────────┐
+ *  │  photo          │   │ eyebrow / title                │
+ *  │                 │   │ 01 promise ─────────────────── │
+ *  │                 │   │ 02 promise ─────────────────── │
+ *  │                 │   │ 03 promise ─────────────────── │
+ *  └─────────────────┘   └────────────────────────────────┘
+ *  ──────────────────── hairline (12 cols) ───────────────────
+ *  „Quote …”                                     [ button ]
+ */
+import type { BlockOf } from '@/content.config';
+import { pad } from '@/lib/content';
+
+type Props = BlockOf<'commitment'>;
+const { image, imageAlt = '', eyebrow, title, items, quote, button, theme } = Astro.props;
+---
+
+<section class={`commitment theme-${theme}`}>
+  <div class="container">
+    <div class="commitment__grid">
+      <figure class="commitment__media" data-clip-reveal>
+        <img src={image} alt={imageAlt} loading="lazy" width="1024" height="1280" />
+      </figure>
+
+      <div class="commitment__body">
+        {eyebrow && <p class="eyebrow" data-reveal>{eyebrow}</p>}
+        {title && <h2 class="commitment__title" data-split>{title}</h2>}
+        <ol role="list" class="commitment__list" data-reveal-stagger>
+          {
+            items.map((item, i) => (
+              <li>
+                <span class="commitment__num" aria-hidden="true">
+                  {pad(i + 1)}
+                </span>
+                <div>
+                  <h3 class="commitment__item-title">{item.title}</h3>
+                  {item.text && <p class="commitment__item-text">{item.text}</p>}
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </div>
+
+    {
+      (quote || button) && (
+        <div class="commitment__close">
+          {quote && (
+            <blockquote class="commitment__quote" data-split>
+              {quote}
+            </blockquote>
+          )}
+          {button && (
+            <a href={button.href} class="btn commitment__btn" data-reveal>
+              {button.label}
+            </a>
+          )}
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style lang="scss">
+  .commitment {
+    padding-block: var(--section-y);
+  }
+
+  // white on white (after the step list): separate with a hairline at container width
+  .commitment.theme-light > .container {
+    padding-top: 0;
+  }
+
+  .commitment.theme-light .commitment__grid {
+    padding-top: var(--section-y);
+    border-top: 1px solid var(--line);
+  }
+
+  .commitment.theme-light {
+    padding-top: 0;
+  }
+
+  .commitment__grid {
+    display: grid;
+    gap: 2.5rem clamp(1rem, 1.6vw, 1.5rem);
+
+    @include up(lg) {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: center;
+    }
+  }
+
+  .commitment__media {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--bg-alt);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @include down(lg) {
+      aspect-ratio: 16 / 10;
+    }
+
+    @include up(lg) {
+      grid-column: 1 / span 5;
+    }
+  }
+
+  .commitment__body {
+    display: grid;
+    gap: 1.25rem;
+
+    @include up(lg) {
+      grid-column: 7 / -1;
+    }
+  }
+
+  .commitment__title {
+    @include display(var(--fs-h2));
+    max-width: 16ch;
+  }
+
+  .commitment__list {
+    margin-top: 0.75rem;
+    border-top: 1px solid var(--line);
+
+    li {
+      display: grid;
+      grid-template-columns: 3.25rem 1fr;
+      align-items: baseline;
+      gap: 1rem;
+      padding-block: 1.25rem;
+      border-bottom: 1px solid var(--line);
+    }
+  }
+
+  .commitment__num {
+    @include display(1.75rem);
+    font-weight: 200;
+    color: var(--accent);
+  }
+
+  .commitment__item-title {
+    @include label;
+    font-size: 0.75rem;
+  }
+
+  .commitment__item-text {
+    margin-top: 0.35rem;
+    font-size: var(--fs-small);
+    color: var(--muted);
+    max-width: 44ch;
+  }
+
+  .commitment__close {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem 3rem;
+    margin-top: clamp(3rem, 6vw, 5rem);
+    padding-top: clamp(2rem, 4vw, 3rem);
+    border-top: 1px solid var(--line);
+  }
+
+  .commitment__quote {
+    @include display(clamp(1.75rem, 1.3rem + 1.8vw, 3rem));
+    max-width: 24ch;
+  }
+
+  .commitment__btn {
+    flex: none;
+  }
+</style>

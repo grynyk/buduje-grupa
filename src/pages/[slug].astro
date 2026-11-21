@@ -1,0 +1,22 @@
+---
+/** Every page in src/content/site/*.json (editable in TinaCMS → "Podstrony"). */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
+import { getSitePages } from '@/lib/content';
+
+export async function getStaticPaths() {
+  const pages = await getSitePages();
+  return pages.map((page) => ({ params: { slug: page.id }, props: { page } }));
+}
+
+const { page } = Astro.props;
+const { seo, hero, blocks, prefooter } = page.data;
+// Header sits over a photo/green hero; otherwise it is the white bar.
+const overlay = hero?.layout === 'image-bg' || hero?.layout === 'dark';
+---
+
+<BaseLayout title={seo.title} description={seo.description} image={hero?.image} header={overlay ? 'overlay' : 'solid'} prefooter={prefooter}>
+  {hero && <PageHero {...hero} />}
+  <BlockRenderer blocks={blocks} />
+</BaseLayout>

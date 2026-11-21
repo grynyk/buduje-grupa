@@ -1,0 +1,59 @@
+{
+  "seo": {
+    "title": "Oferta — trzy standardy budowy | BUDUJE GRUPA",
+    "description": "Stan surowy zamknięty, stan deweloperski lub dom pod klucz. Każdą ofertę liczymy indywidualnie."
+  },
+  "prefooter": "quote",
+  "hero": {
+    "layout": "split",
+    "eyebrow": "Oferta",
+    "title": "Trzy standardy. Jeden wykonawca.",
+    "text": "Wybierz, na jakim etapie przekazujemy Ci dom. Każdą ofertę liczymy indywidualnie — na podstawie projektu, działki i Twoich oczekiwań."
+  },
+  "blocks": [
+    {
+      "_template": "packages",
+      "button": {
+        "label": "Zapytaj o wycenę",
+        "href": "/kontakt"
+      },
+      "items": [
+        {
+          "name": "Stan surowy zamknięty",
+          "lead": "Dla osób, które chcą wykończyć dom we własnym zakresie.",
+          "price": "[od ___ zł / m²]",
+          "features": [
+            "Fundament / płyta",
+            "Konstrukcja ścian i stropów",
+            "Dach z pokryciem",
+            "Okna i drzwi zewnętrzne"
+          ]
+        },
+        {
+          "name": "Stan deweloperski",
+          "lead": "Dom gotowy do prac wykończeniowych.",
+          "price": "[od ___ zł / m²]",
+          "features": [
+            "Wszystko ze stanu surowego",
+            "Izolacje i elewacja",
+            "Instalacje: elektryka, woda, ogrzewanie",
+            "Wylewki i płyty g-k"
+          ]
+        },
+        {
+          "name": "Pod klucz",
+          "lead": "Wprowadzasz się z walizkami.",
+          "price": "[od ___ zł / m²]",
+          "highlighted": true,
+          "badge": "Najczęściej wybierany",
+          "features": [
+            "Wszystko ze stanu deweloperskiego",
+            "Podłogi i drzwi wewnętrzne",
+            "Łazienki i biały montaż",
+            "Malowanie i sprzątanie"
+          ]
+        }
+      ]
+    }
+  ]
+}

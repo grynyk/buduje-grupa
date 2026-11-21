@@ -1,0 +1,268 @@
+---
+/**
+ * Realization (case study) page.
+ *
+ *  header      crumbs · category · title (left) · excerpt (right)
+ *  facts bar   Lokalizacja | Rok | Powierzchnia | Czas realizacji | Zakres
+ *  cover       large, clean photo (opens the lightbox)
+ *  story       sticky "ask about a similar house" box (left) + description (right)
+ *  gallery     2-column grid, every photo opens the lightbox
+ *  prev/next   neighbouring realizations + "all realizations"
+ */
+import { render } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import Lightbox from '@/components/Lightbox.astro';
+import Icon from '@/components/Icon.astro';
+import Facts from '@/components/detail/Facts.astro';
+import ZoomImage from '@/components/detail/ZoomImage.astro';
+import Gallery from '@/components/detail/Gallery.astro';
+import AskBox from '@/components/detail/AskBox.astro';
+import { getProjects } from '@/lib/content';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    props: {
+      project,
+      prev: projects.length > 1 ? projects[(i - 1 + projects.length) % projects.length] : undefined,
+      next: projects.length > 1 ? projects[(i + 1) % projects.length] : undefined,
+      total: projects.length,
+    },
+  }));
+}
+
+const { project, prev, next, total } = Astro.props;
+const { Content } = await render(project);
+const d = project.data;
+const gallery = d.gallery.filter((src) => src !== d.cover);
+---
+
+<BaseLayout title={`${d.title} — Realizacje — BUDUJE GRUPA`} description={d.excerpt} image={d.cover} header="solid" prefooter="visit">
+  <PageHero
+    layout="split"
+    eyebrow={d.category}
+    title={d.title}
+    text={d.excerpt}
+    crumbs={[{ label: 'Realizacje', href: '/realizacje' }, { label: d.title }]}
+  />
+
+  <section class="detail theme-light">
+    <div class="container">
+      <Facts
+        facts={[
+          { label: 'Lokalizacja', value: d.location },
+          { label: 'Rok', value: d.year },
+          { label: 'Powierzchnia', value: d.area },
+          { label: 'Czas realizacji', value: d.duration },
+          { label: 'Zakres', value: d.scope },
+        ]}
+      />
+
+      <ZoomImage src={d.cover} alt={d.title} variant="cover" eager />
+
+      <div class="detail__story">
+        <div class="detail__aside">
+          <AskBox
+            title="Interesuje Cię podobny dom?"
+            text="Opowiedz nam o swojej działce — przygotujemy wycenę i harmonogram."
+            href={`/kontakt?realizacja=${encodeURIComponent(d.title)}`}
+            label="Zapytaj o podobny dom"
+          />
+        </div>
+        <div class="detail__body prose" data-reveal>
+          <Content />
+        </div>
+      </div>
+
+      <Gallery images={gallery} alt={(i) => `${d.title} — zdjęcie ${i + 2}`} total={gallery.length + 1} />
+    </div>
+  </section>
+
+  {
+    prev && next && (
+      <nav class="pager theme-light" aria-label="Inne realizacje">
+        <div class="container">
+          <div class="pager__grid">
+            {[
+              { p: prev, side: 'prev' as const, label: 'Poprzednia realizacja' },
+              { p: next, side: 'next' as const, label: 'Następna realizacja' },
+            ].map(({ p, side, label }) => (
+              <a href={`/realizacje/${p.id}`} class:list={['pager__link', `pager__link--${side}`]} rel={side}>
+                <span class="pager__media">
+                  <img src={p.data.cover} alt="" loading="lazy" width="1024" height="1280" />
+                </span>
+                <span class="pager__text">
+                  <span class="pager__dir">
+                    {side === 'prev' && <Icon name="arrow-left" />}
+                    {label}
+                    {side === 'next' && <Icon name="arrow-right" />}
+                  </span>
+                  <span class="pager__title">{p.data.title}</span>
+                  <span class="pager__meta">{[p.data.location, p.data.year].filter(Boolean).join(' · ')}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+          <div class="pager__all">
+            <a href="/realizacje" class="btn btn--ghost">
+              Wszystkie realizacje ({total})
+            </a>
+          </div>
+        </div>
+      </nav>
+    )
+  }
+
+  <Lightbox />
+</BaseLayout>
+
+<style lang="scss">
+  .detail {
+    padding-bottom: var(--section-y);
+  }
+
+  // 12-col: sticky ask box (cols 1–4) + description (cols 6–12)
+  .detail__story {
+    display: grid;
+    gap: 2.5rem clamp(1rem, 1.6vw, 1.5rem);
+    margin-top: clamp(3rem, 6vw, 5rem);
+
+    @include up(lg) {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: start;
+    }
+  }
+
+  .detail__aside {
+    @include up(lg) {
+      grid-column: 1 / span 4;
+      position: sticky;
+      top: calc(var(--header-h) + 2rem);
+    }
+  }
+
+  .detail__body {
+    @include up(lg) {
+      grid-column: 6 / -1;
+
+      > :first-child {
+        margin-top: 0;
+      }
+    }
+  }
+
+  /* ---------- prev / next ---------- */
+  .pager {
+    padding-bottom: var(--section-y);
+  }
+
+  .pager__grid {
+    display: grid;
+    gap: 1px;
+    background: var(--line); // hairline between the two halves
+    border-block: 1px solid var(--line);
+
+    @include up(md) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .pager__link {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem 0;
+    background: var(--bg);
+
+    @include up(md) {
+      grid-template-columns: 8rem 1fr;
+    }
+
+    @include hover {
+      .pager__media img {
+        transform: scale(1.06);
+      }
+
+      .pager__title {
+        text-decoration-color: currentColor;
+      }
+    }
+  }
+
+  // next: image on the right, text right-aligned
+  .pager__link--next {
+    @include up(md) {
+      grid-template-columns: 1fr 8rem;
+      padding-left: 1.5rem;
+      text-align: right;
+
+      .pager__media {
+        order: 2;
+      }
+
+      .pager__dir {
+        justify-content: flex-end;
+      }
+    }
+  }
+
+  .pager__link--prev {
+    @include up(md) {
+      padding-right: 1.5rem;
+    }
+  }
+
+  .pager__media {
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--bg-alt);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.9s var(--ease-out);
+    }
+  }
+
+  .pager__text {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .pager__dir {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    @include label;
+    color: var(--accent);
+
+    :global(.icon) {
+      width: 0.875rem;
+      stroke-width: 1.5;
+    }
+  }
+
+  .pager__title {
+    @include display(var(--fs-h3));
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    transition: text-decoration-color 0.3s;
+  }
+
+  .pager__meta {
+    font-size: var(--fs-small);
+    color: var(--muted);
+  }
+
+  .pager__all {
+    display: flex;
+    justify-content: center;
+    margin-top: clamp(1.5rem, 3vw, 2rem);
+  }
+</style>

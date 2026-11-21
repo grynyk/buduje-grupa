@@ -1,0 +1,288 @@
+---
+/**
+ * Catalog design page (ready-made house design).
+ *
+ *  header      crumbs · "Projekt domu" · title (left) · excerpt (right)
+ *  specs bar   Powierzchnia | Pokoje | Kondygnacje | Wyróżnik
+ *  cover       large visualisation (lightbox)
+ *  story       sticky "ask about this design" box (left) + description, "Co możemy zmienić", floor plans (right)
+ *  gallery     visualisations (when added in the CMS)
+ *  see also    other designs from the catalog
+ */
+import { render } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import Lightbox from '@/components/Lightbox.astro';
+import Icon from '@/components/Icon.astro';
+import DesignCard from '@/components/DesignCard.astro';
+import Facts from '@/components/detail/Facts.astro';
+import ZoomImage from '@/components/detail/ZoomImage.astro';
+import Gallery from '@/components/detail/Gallery.astro';
+import AskBox from '@/components/detail/AskBox.astro';
+import { getCatalog } from '@/lib/content';
+
+export async function getStaticPaths() {
+  const designs = await getCatalog();
+  return designs.map((design, i) => ({
+    params: { slug: design.id },
+    // "see also": the next designs in catalog order (wrapping), max 3
+    props: {
+      design,
+      others: [...designs.slice(i + 1), ...designs.slice(0, i)].slice(0, 3),
+      total: designs.length,
+    },
+  }));
+}
+
+const { design, others, total } = Astro.props;
+const { Content } = await render(design);
+const d = design.data;
+
+// default list from the brand mockup ("przesunąć ściany, dodać pokój, garaż lub taras")
+const modifications = d.modifications.length
+  ? d.modifications
+  : ['Przesunięcie ścian i zmiana układu pomieszczeń', 'Dodatkowy pokój lub antresola', 'Garaż w bryle lub wolnostojący', 'Taras, zadaszenie i większe przeszklenia'];
+const gallery = d.gallery.filter((src) => src !== d.image);
+---
+
+<BaseLayout title={`${d.title} — Katalog projektów — BUDUJE GRUPA`} description={d.excerpt} image={d.image} header="solid" prefooter="custom">
+  <PageHero
+    layout="split"
+    eyebrow="Projekt domu"
+    title={d.title}
+    text={d.excerpt}
+    crumbs={[{ label: 'Katalog', href: '/katalog' }, { label: d.title }]}
+  />
+
+  <section class="detail theme-light">
+    <div class="container">
+      <Facts
+        facts={[
+          { label: 'Powierzchnia', value: `${d.area} m²` },
+          { label: 'Pokoje', value: d.rooms },
+          { label: 'Kondygnacje', value: d.floors === 'parterowy' ? 'Parterowy' : 'Z poddaszem' },
+          { label: 'Wyróżnik', value: d.feature },
+        ]}
+      />
+
+      <ZoomImage src={d.image} alt={`Projekt domu ${d.title}`} variant="cover" eager />
+
+      <div class="detail__story">
+        <div class="detail__aside">
+          <AskBox
+            title="Podoba Ci się ten projekt?"
+            text="Wycenimy go w wybranym standardzie i dopasujemy do Twojej działki."
+            href={`/kontakt?projekt=${encodeURIComponent(d.title)}`}
+            label="Zapytaj o ten projekt"
+          >
+            <ul role="list" class="standards">
+              <li>Stan surowy zamknięty</li>
+              <li>Stan deweloperski</li>
+              <li>Pod klucz</li>
+            </ul>
+          </AskBox>
+        </div>
+
+        <div class="detail__body">
+          <div class="prose" data-reveal>
+            <Content />
+          </div>
+
+          <div class="mods" data-reveal>
+            <h2 class="mods__title">Co możemy zmienić</h2>
+            <ul role="list" class="mods__list">
+              {
+                modifications.map((m) => (
+                  <li>
+                    <Icon name="check" />
+                    {m}
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+
+          {
+            d.plans.length > 0 && (
+              <div class="plans" data-reveal>
+                <h2 class="mods__title">Rzuty</h2>
+                <ul role="list" class="plans__grid">
+                  {d.plans.map((p, i) => (
+                    <li>
+                      <ZoomImage src={p.image} alt={`${d.title} — ${p.label ?? `rzut ${i + 1}`}`} variant="plan" />
+                      {p.label && <p class="plans__label">{p.label}</p>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          }
+        </div>
+      </div>
+
+      <Gallery images={gallery} alt={(i) => `${d.title} — wizualizacja ${i + 2}`} label="Wizualizacje" total={gallery.length + 1} />
+    </div>
+  </section>
+
+  {
+    others.length > 0 && (
+      <section class="more theme-light" aria-labelledby="more-title">
+        <div class="container">
+          <header class="more__head">
+            <div>
+              <p class="eyebrow">Katalog</p>
+              <h2 class="display more__title" id="more-title">
+                Zobacz też
+              </h2>
+            </div>
+            <a href="/katalog" class="btn btn--ghost">
+              Wszystkie projekty ({total})
+            </a>
+          </header>
+          <ul role="list" class="more__grid">
+            {others.map((o) => (
+              <li>
+                <DesignCard design={o} headingLevel="h3" />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  <Lightbox />
+</BaseLayout>
+
+<style lang="scss">
+  .detail {
+    padding-bottom: var(--section-y);
+  }
+
+  .detail__story {
+    display: grid;
+    gap: 2.5rem clamp(1rem, 1.6vw, 1.5rem);
+    margin-top: clamp(3rem, 6vw, 5rem);
+
+    @include up(lg) {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: start;
+    }
+  }
+
+  .detail__aside {
+    @include up(lg) {
+      grid-column: 1 / span 4;
+      position: sticky;
+      top: calc(var(--header-h) + 2rem);
+    }
+  }
+
+  .detail__body {
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 3.5rem);
+
+    @include up(lg) {
+      grid-column: 6 / -1;
+
+      .prose > :first-child {
+        margin-top: 0;
+      }
+    }
+  }
+
+  // the three standards inside the ask box
+  .standards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.25rem;
+
+    li {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.75rem;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: var(--c-white);
+    }
+  }
+
+  .mods__title {
+    @include display(var(--fs-h3));
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .mods__list {
+    display: grid;
+
+    @include up(md) {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 1.5rem;
+    }
+
+    li {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding-block: 0.95rem;
+      border-bottom: 1px solid var(--line);
+      font-size: var(--fs-small);
+    }
+
+    :global(.icon) {
+      flex: none;
+      width: 1rem;
+      height: 1rem;
+      margin-top: 0.15rem;
+      stroke-width: 1.5;
+      color: var(--accent);
+    }
+  }
+
+  .plans__grid {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+
+    @include up(md) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .plans__label {
+    margin-top: 0.6rem;
+    @include label;
+    color: var(--muted);
+  }
+
+  /* ---------- see also ---------- */
+  .more {
+    padding-bottom: var(--section-y);
+  }
+
+  .more__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem 3rem;
+    padding-top: clamp(2.5rem, 5vw, 4rem);
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+    border-top: 1px solid var(--line);
+
+    > div {
+      display: grid;
+      gap: 1.25rem;
+    }
+  }
+
+  .more__grid {
+    display: grid;
+    gap: 2.5rem clamp(1rem, 2vw, 1.5rem);
+
+    @include up(md) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

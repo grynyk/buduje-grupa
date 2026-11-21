@@ -1,0 +1,94 @@
+{
+  "seo": {
+    "title": "Bezpłatny poradnik inwestora — budowa domu szkieletowego | BUDUJE GRUPA",
+    "description": "Jak przygotować się do budowy domu szkieletowego? Działka, pozwolenie na budowę, projekt i budżet w jednym poradniku PDF. Wyślemy go na Twój e-mail."
+  },
+  "prefooter": "none",
+  "blocks": [
+    {
+      "_template": "guide",
+      "variant": "hero",
+      "eyebrow": "Bezpłatny poradnik PDF",
+      "title": "Jak przygotować się do budowy domu szkieletowego?",
+      "text": "Działka, formalności, projekt i budżet — w jednym miejscu. Praktyczny poradnik, który pomoże Ci uniknąć kosztownych błędów, zanim ruszy budowa.",
+      "topics": [
+        "Działka i warunki zabudowy",
+        "Pozwolenie na budowę czy zgłoszenie",
+        "Projekt z katalogu czy indywidualny",
+        "Budżet, kredyt i płatności etapami"
+      ],
+      "image": "/images/zespol.jpg",
+      "formTitle": "Wyślemy Ci poradnik na e-mail",
+      "buttonLabel": "Odbieram bezpłatny poradnik",
+      "note": "Bez spamu — tylko poradnik i ewentualna odpowiedź na Twoje pytania.",
+      "showRating": false
+    },
+    {
+      "_template": "features",
+      "eyebrow": "Co znajdziesz w środku?",
+      "title": "Sześć rozdziałów, krok po kroku.",
+      "numbered": true,
+      "columns": 3,
+      "theme": "paper",
+      "layout": "grid",
+      "items": [
+        {
+          "title": "Jak sprawdzić działkę",
+          "text": "MPZP lub warunki zabudowy, dojazd, media i grunt — co zweryfikować przed zakupem."
+        },
+        {
+          "title": "Pozwolenie czy zgłoszenie",
+          "text": "Kiedy wystarczy zgłoszenie, jakie dokumenty są potrzebne i ile trwają formalności."
+        },
+        {
+          "title": "Projekt gotowy czy indywidualny",
+          "text": "Porównanie kosztów i czasu oraz co da się zmienić w projekcie z katalogu."
+        },
+        {
+          "title": "Dom szkieletowy w praktyce",
+          "text": "Jak zbudowana jest ściana, płyta fundamentowa i dlaczego budujemy przez cały rok."
+        },
+        {
+          "title": "Budżet i finansowanie",
+          "text": "Kredyt hipoteczny, płatności etapami i koszty, o których warto pomyśleć wcześniej."
+        },
+        {
+          "title": "Jak porównywać oferty",
+          "text": "Na co zwrócić uwagę w kosztorysie i umowie z wykonawcą."
+        }
+      ]
+    },
+    {
+      "_template": "faq",
+      "eyebrow": "FAQ",
+      "title": "Często zadawane pytania",
+      "items": [
+        {
+          "question": "Czy dom szkieletowy jest trwały?",
+          "answer": "Tak. Prawidłowo zaprojektowana i wykonana konstrukcja służy przez pokolenia, co potwierdzają domy w Skandynawii i Ameryce Północnej."
+        },
+        {
+          "question": "Ile trwa budowa?",
+          "answer": "Sucha technologia skraca budowę do kilku miesięcy, niezależnie od pory roku. Stan surowy zamknięty stawiamy w ciągu kilku tygodni, a dokładny harmonogram zapisujemy w umowie."
+        },
+        {
+          "question": "Czy mogę budować na zgłoszenie?",
+          "answer": "To zależy od wielkości domu i zapisów dla Twojej działki. Sprawdzimy to podczas konsultacji i przygotujemy dokumenty — zgłoszenie albo wniosek o pozwolenie na budowę."
+        },
+        {
+          "question": "Jak przygotować działkę?",
+          "answer": "Potrzebny jest dojazd dla transportu, dostęp do prądu i wody oraz mapa do celów projektowych. Przed fundamentami wytyczamy budynek i przygotowujemy teren — przeprowadzimy Cię przez to krok po kroku."
+        },
+        {
+          "question": "Czy dom szkieletowy jest bezpieczny pożarowo?",
+          "answer": "Tak. Konstrukcję chronią okładziny z płyt gipsowo-kartonowych i wełna mineralna, a budynek projektujemy zgodnie z przepisami dla domów mieszkalnych."
+        },
+        {
+          "question": "Jakie są koszty ogrzewania?",
+          "answer": "Ciepłe przegrody i rekuperacja to niskie rachunki przez cały rok. Szacunek kosztów ogrzewania przygotujemy dla Twojego projektu i wybranego źródła ciepła."
+        }
+      ],
+      "heading": "h2"
+    }
+  ]
+}

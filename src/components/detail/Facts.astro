@@ -1,0 +1,54 @@
+---
+/** Key facts bar for detail pages: label over value, hairline grid (2 → 3 → n columns). */
+interface Props {
+  facts: { label: string; value?: string | number | null }[];
+}
+const facts = Astro.props.facts.filter((f) => f.value !== undefined && f.value !== null && f.value !== '');
+---
+
+{
+  facts.length > 0 && (
+    <dl class="facts" style={`--n: ${facts.length}`} data-reveal-stagger>
+      {facts.map((f) => (
+        <div class="facts__item">
+          <dt>{f.label}</dt>
+          <dd>{f.value}</dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
+
+<style lang="scss">
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--fg);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+
+    @include up(md) {
+      grid-template-columns: repeat(min(var(--n), 3), minmax(0, 1fr));
+    }
+
+    @include up(lg) {
+      grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    }
+  }
+
+  .facts__item {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1.1rem 1rem 1.1rem 0;
+
+    dt {
+      @include label;
+      color: var(--muted);
+    }
+
+    dd {
+      @include display(clamp(1.125rem, 1rem + 0.4vw, 1.375rem));
+      font-weight: 400;
+    }
+  }
+</style>

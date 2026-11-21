@@ -1,0 +1,51 @@
+---
+/**
+ * Brand logo (vector, from the brand files). Colour follows `currentColor`.
+ * - wordmark: "BUDUJE GRUPA®"  (header, footer)
+ * - mark:     "BG®" monogram   (compact spots, favicon)
+ */
+import wordmark from '@/assets/brand/logo-wordmark.svg?raw';
+import mark from '@/assets/brand/logo-mark.svg?raw';
+import { centredMark } from '@/lib/brand';
+
+interface Props {
+  /** mark-centred: box = the letters only (® overflows) — use inside circles/badges */
+  variant?: 'wordmark' | 'mark' | 'mark-centred';
+  class?: string;
+}
+const { variant = 'wordmark', class: className } = Astro.props;
+const svg =
+  variant === 'mark-centred'
+    ? centredMark
+    : (variant === 'mark' ? mark : wordmark).replace('<svg ', '<svg aria-hidden="true" focusable="false" ');
+---
+
+<span class:list={['logo', `logo--${variant}`, className]} set:html={svg} />
+
+<style lang="scss">
+  .logo {
+    display: inline-block;
+    line-height: 0;
+    color: currentColor;
+
+    :global(svg) {
+      display: block;
+      width: auto;
+      height: 100%;
+    }
+  }
+
+  .logo--wordmark {
+    height: 1.25rem;
+  }
+
+  // letters-only box; the ® overflows top-right
+  .logo--mark-centred {
+    height: 1.5rem;
+    overflow: visible;
+  }
+
+  .logo--mark {
+    height: 2rem;
+  }
+</style>

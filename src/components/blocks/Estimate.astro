@@ -1,0 +1,45 @@
+---
+import type { BlockOf } from '@/content.config';
+import EstimateForm from '@/components/EstimateForm.astro';
+
+type Props = BlockOf<'estimate'>;
+const { eyebrow, title, text, standards, buttonLabel } = Astro.props;
+---
+
+<section class="section estimate theme-light" id="kosztorys">
+  <div class="container estimate__grid">
+    <div class="estimate__intro">
+      {eyebrow && <p class="eyebrow" data-reveal>{eyebrow}</p>}
+      <h2 class="display estimate__title" data-split>{title}</h2>
+      {text && <p class="lead" data-reveal>{text}</p>}
+    </div>
+    <div class="estimate__card" data-reveal>
+      <EstimateForm standards={standards} buttonLabel={buttonLabel} />
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  // white section, beige form card (the beige band below stays separate)
+  .estimate__card {
+    --field-bg: var(--c-white);
+    padding: clamp(1.5rem, 3.5vw, 2.5rem);
+    background: var(--c-paper);
+  }
+
+  .estimate__grid {
+    display: grid;
+    gap: 2.5rem clamp(3rem, 6vw, 6rem);
+
+    @include up(lg) {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+    }
+  }
+
+  .estimate__intro {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 32rem;
+  }
+</style>

@@ -1,0 +1,78 @@
+---
+import type { BlockOf } from '@/content.config';
+
+type Props = BlockOf<'schedule'>;
+const { eyebrow, stages } = Astro.props;
+---
+
+<section class="schedule theme-light">
+  <div class="container">
+    {eyebrow && <p class="eyebrow schedule__eyebrow" data-reveal>{eyebrow}</p>}
+    <ol role="list" class="schedule__bar" data-schedule>
+      {
+        stages.map((s) => (
+          <li class="schedule__stage" style={`--w: ${s.weight}`}>
+            <span class="schedule__fill" aria-hidden="true" />
+            <span class="schedule__label">{s.label}</span>
+            {s.value && <span class="schedule__value">{s.value}</span>}
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style lang="scss">
+  .schedule {
+    padding-bottom: clamp(2rem, 4vw, 3rem);
+  }
+
+  .schedule__eyebrow {
+    margin-bottom: 1.5rem;
+  }
+
+  .schedule__bar {
+    display: grid;
+    gap: 0.75rem;
+
+    @include up(md) {
+      display: flex;
+      gap: 4px;
+    }
+  }
+
+  .schedule__stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding-top: 1.5rem;
+
+    @include up(md) {
+      flex: var(--w) 1 0;
+    }
+  }
+
+  // segment bar: green fill on paper track
+  .schedule__fill {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 0.5rem;
+    background: var(--c-green);
+    transform-origin: left;
+  }
+
+  .schedule__stage:nth-child(even) .schedule__fill {
+    background: var(--c-sage-dark);
+  }
+
+  .schedule__label {
+    @include label;
+    font-size: 0.6875rem;
+  }
+
+  .schedule__value {
+    @include display(1.5rem);
+    font-weight: 300;
+  }
+</style>

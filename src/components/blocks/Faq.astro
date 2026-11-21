@@ -1,0 +1,204 @@
+---
+import type { BlockOf } from '@/content.config';
+
+type Props = BlockOf<'faq'>;
+const { eyebrow, title, items, aside, image, heading } = Astro.props;
+const H = heading;
+const top = heading === 'h1';
+---
+
+<section class:list={['faq theme-light', { 'faq--top': top }]} data-hero={top ? '' : undefined}>
+  <div class:list={['container faq__grid', { 'faq__grid--full': !aside && !image }]}>
+    <div class="faq__main">
+      {eyebrow && <p class="eyebrow" data-hero-fade={top ? '' : undefined} data-reveal={top ? undefined : ''}>{eyebrow}</p>}
+      {
+        title && (
+          <H class="faq__title">
+            <span class="faq__line">
+              <span data-hero-line={top ? '' : undefined} data-split={top ? undefined : ''}>{title}</span>
+            </span>
+          </H>
+        )
+      }
+      <div class="faq__list" data-reveal-stagger>
+        {
+          items.map((item, i) => (
+            <details class="faq__item" open={i === 0}>
+              <summary>
+                <span>{item.question}</span>
+                <span class="faq__toggle" aria-hidden="true" />
+              </summary>
+              <p class="faq__answer">{item.answer}</p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+
+    {
+      (aside || image) && (
+        <aside class="faq__aside" data-reveal>
+          {aside && (
+            <div class="faq__card theme-dark">
+              {aside.eyebrow && <p class="eyebrow">{aside.eyebrow}</p>}
+              <h2 class="faq__card-title">{aside.title}</h2>
+              {aside.text && <p class="faq__card-text">{aside.text}</p>}
+              {aside.button && (
+                <a href={aside.button.href} class="btn">
+                  {aside.button.label}
+                </a>
+              )}
+            </div>
+          )}
+          {image && (
+            <figure class="faq__image">
+              <img src={image} alt="" loading="lazy" width="1536" height="864" />
+            </figure>
+          )}
+        </aside>
+      )
+    }
+  </div>
+</section>
+
+<style lang="scss">
+  .faq {
+    padding-block: var(--section-y);
+  }
+
+  .faq--top {
+    padding-top: calc(var(--header-h) + clamp(3.5rem, 7vw, 6.5rem));
+  }
+
+  .faq__grid {
+    display: grid;
+    gap: 3rem clamp(3rem, 6vw, 6rem);
+
+    @include up(lg) {
+      grid-template-columns: 1.5fr 1fr;
+      align-items: start;
+    }
+  }
+
+  // no side card: the list spans the full container width
+  .faq__grid--full {
+    @include up(lg) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .faq__main {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .faq__title {
+    @include display(var(--fs-h1));
+    line-height: 1.05;
+    max-width: 14ch;
+  }
+
+  .faq__line {
+    display: block;
+    overflow: hidden;
+    padding-block: 0.08em;
+    margin-block: -0.08em;
+
+    > span {
+      display: block;
+    }
+  }
+
+  .faq__list {
+    margin-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .faq__item {
+    border-bottom: 1px solid var(--line);
+
+    summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding-block: 1.25rem;
+      cursor: pointer;
+      list-style: none;
+      @include display(clamp(1.0625rem, 1rem + 0.3vw, 1.25rem));
+      font-weight: 400;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+    }
+  }
+
+  // "+" that turns into "−"
+  .faq__toggle {
+    position: relative;
+    flex: none;
+    width: 0.875rem;
+    height: 0.875rem;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: currentColor;
+      transition: transform 0.3s var(--ease-out);
+    }
+
+    &::after {
+      transform: rotate(90deg);
+    }
+  }
+
+  .faq__item[open] .faq__toggle::after {
+    transform: rotate(0deg);
+  }
+
+  .faq__answer {
+    padding-bottom: 1.25rem;
+    max-width: 72ch;
+    font-size: var(--fs-small);
+    color: var(--muted);
+  }
+
+  .faq__aside {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .faq__card {
+    display: grid;
+    gap: 0.9rem;
+    justify-items: start;
+    padding: clamp(1.75rem, 3vw, 2rem);
+  }
+
+  .faq__card-title {
+    @include display(1.625rem);
+  }
+
+  .faq__card-text {
+    font-size: var(--fs-small);
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .faq__image {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+</style>

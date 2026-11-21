@@ -1,0 +1,179 @@
+---
+/**
+ * Free guide (lead magnet).
+ *  hero    — opens the page: label "Bezpłatny poradnik PDF", h1, intro, topics (left) · form card (right)
+ *  closing — green band at the end of the page: title + text (left) · form (right)
+ */
+import type { BlockOf } from '@/content.config';
+import Icon from '@/components/Icon.astro';
+import GuideForm from '@/components/GuideForm.astro';
+import GoogleRating from '@/components/GoogleRating.astro';
+
+type Props = BlockOf<'guide'>;
+const { variant, eyebrow, title, text, topics, formTitle, buttonLabel, note, pdf, showRating, image } = Astro.props;
+const hero = variant === 'hero';
+const formId = hero ? 'poradnik' : 'poradnik-2';
+---
+
+<section
+  class:list={['guide', hero ? 'guide--hero theme-light' : 'guide--closing theme-dark']}
+  id={hero ? 'poradnik' : undefined}
+  data-hero={hero ? '' : undefined}
+>
+  <div class="container guide__grid">
+    <div class="guide__intro">
+      {eyebrow && <p class="eyebrow" data-hero-fade={hero ? '' : undefined} data-reveal={hero ? undefined : ''}>{eyebrow}</p>}
+      {
+        hero ? (
+          <h1 class="guide__title">
+            <span class="guide__line">
+              <span data-hero-line>{title}</span>
+            </span>
+          </h1>
+        ) : (
+          <h2 class="guide__title" data-split>
+            {title}
+          </h2>
+        )
+      }
+      {text && <p class="guide__text" data-hero-fade={hero ? '' : undefined} data-reveal={hero ? undefined : ''}>{text}</p>}
+      {
+        topics.length > 0 && (
+          <ul role="list" class="guide__topics" data-reveal-stagger>
+            {topics.map((t) => (
+              <li>
+                <Icon name="check" />
+                {t}
+              </li>
+            ))}
+          </ul>
+        )
+      }
+      {
+        showRating && (
+          <div class="guide__rating" data-reveal>
+            <GoogleRating />
+          </div>
+        )
+      }
+    </div>
+
+    <div class="guide__card" data-reveal>
+      {hero && image && <img class="guide__cover" src={image} alt="" width="1536" height="864" />}
+      {formTitle && <p class="guide__form-title">{formTitle}</p>}
+      <GuideForm id={formId} buttonLabel={buttonLabel} note={note} pdf={pdf} />
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  .guide--hero {
+    padding-top: calc(var(--header-h) + clamp(3.5rem, 7vw, 6rem));
+    padding-bottom: var(--section-y);
+  }
+
+  .guide--closing {
+    padding-block: var(--section-y);
+  }
+
+  .guide__grid {
+    display: grid;
+    gap: 3rem clamp(1rem, 1.6vw, 1.5rem);
+
+    @include up(lg) {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: start;
+    }
+  }
+
+  .guide__intro {
+    display: grid;
+    gap: 1.5rem;
+    align-content: start;
+
+    @include up(lg) {
+      grid-column: 1 / span 6;
+    }
+  }
+
+  .guide__title {
+    @include display(var(--fs-h1));
+    line-height: 1.05;
+    max-width: 16ch;
+  }
+
+  .guide--closing .guide__title {
+    @include display(var(--fs-h2));
+  }
+
+  .guide__line {
+    display: block;
+    overflow: hidden;
+    padding-block: 0.08em;
+    margin-block: -0.08em;
+
+    > span {
+      display: block;
+    }
+  }
+
+  .guide__text {
+    max-width: 34rem;
+    font-size: var(--fs-lead);
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  .guide__topics {
+    display: grid;
+    border-top: 1px solid var(--line);
+    max-width: 34rem;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-block: 0.85rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    :global(.icon) {
+      flex: none;
+      width: 1rem;
+      height: 1rem;
+      stroke-width: 1.5;
+      color: var(--accent);
+    }
+  }
+
+  .guide__rating {
+    margin-top: 0.5rem;
+  }
+
+  .guide__card {
+    --field-bg: var(--c-white);
+    display: grid;
+    gap: 1.25rem;
+    padding: clamp(1.5rem, 3.5vw, 2.5rem);
+    background: var(--c-paper);
+
+    @include up(lg) {
+      grid-column: 8 / -1;
+    }
+  }
+
+  .guide--closing .guide__card {
+    --field-bg: rgb(255 255 255 / 0.08);
+    background: var(--c-green-2);
+  }
+
+  .guide__cover {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .guide__form-title {
+    @include display(var(--fs-h3));
+  }
+</style>

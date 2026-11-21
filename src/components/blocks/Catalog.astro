@@ -1,0 +1,72 @@
+---
+import DesignCard from '@/components/DesignCard.astro';
+import { getCatalog } from '@/lib/content';
+
+const designs = await getCatalog();
+const sizeOf = (area: number) => (area <= 100 ? 'do-100' : area <= 150 ? '100-150' : 'od-150');
+const filters = [
+  { key: '*', label: 'Wszystkie' },
+  { key: 'do-100', label: 'do 100 m²' },
+  { key: '100-150', label: '100–150 m²' },
+  { key: 'od-150', label: 'powyżej 150 m²' },
+  { key: 'parterowy', label: 'Parterowe' },
+  { key: 'z poddaszem', label: 'Z poddaszem' },
+];
+---
+
+<section class="catalog" data-filter-root>
+  <div class="container">
+    <div class="catalog__filters" role="group" aria-label="Filtruj projekty">
+      {
+        filters.map((f, i) => (
+          <button type="button" class:list={['pill', { 'is-active': i === 0 }]} data-filter={f.key} aria-pressed={i === 0 ? 'true' : 'false'}>
+            {f.label}
+          </button>
+        ))
+      }
+    </div>
+
+    <ul role="list" class="catalog__grid" data-reveal-stagger>
+      {
+        designs.map((d) => (
+          <li data-item data-tags={`${sizeOf(d.data.area)}|${d.data.floors}`}>
+            <DesignCard design={d} />
+          </li>
+        ))
+      }
+    </ul>
+    <p class="sr-only" aria-live="polite" data-filter-count></p>
+  </div>
+</section>
+
+<script>
+  import { initFilter } from '@/scripts/filter';
+  initFilter();
+</script>
+
+<style lang="scss">
+  .catalog {
+    padding-bottom: var(--section-y);
+  }
+
+  .catalog__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .catalog__grid {
+    display: grid;
+    gap: 2.5rem 1.25rem;
+
+    @include up(md) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    > li[hidden] {
+      display: none;
+    }
+  }
+
+</style>

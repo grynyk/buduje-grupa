@@ -1,0 +1,109 @@
+---
+import type { BlockOf } from '@/content.config';
+import { pad } from '@/lib/content';
+
+type Props = BlockOf<'steps'>;
+const { eyebrow, items } = Astro.props;
+const last = items.length - 1;
+---
+
+<section class="steps">
+  <div class="container">
+    {eyebrow && <p class="eyebrow steps__eyebrow" data-reveal>{eyebrow}</p>}
+    <ol role="list" class="steps__list" style={`--count: ${items.length}`} data-steps>
+      {
+        items.map((s, i) => (
+          <li class:list={['steps__item', { 'is-last': i === last }]} data-step-item>
+            <span class="steps__marker" aria-hidden="true">
+              <span class="steps__circle">{pad(i + 1)}</span>
+              {i !== last && <span class="steps__line" />}
+            </span>
+            <h2 class="steps__title">
+              <span class="sr-only">Krok {i + 1}: </span>
+              {s.title}
+            </h2>
+            {s.text && <p class="steps__text">{s.text}</p>}
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style lang="scss">
+  .steps {
+    padding-bottom: var(--section-y);
+  }
+
+  .steps__eyebrow {
+    margin-bottom: 2rem;
+  }
+
+  .steps__list {
+    display: grid;
+    gap: 2rem 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    @include up(md) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    @include up(lg) {
+      grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+    }
+  }
+
+  .steps__item {
+    display: grid;
+    gap: 0.75rem;
+    align-content: start;
+  }
+
+  .steps__marker {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .steps__circle {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--c-green);
+    border-radius: 50%;
+    font-size: 0.8125rem;
+    transition:
+      background 0.4s,
+      color 0.4s;
+  }
+
+  .is-last .steps__circle,
+  .steps__item.is-active .steps__circle {
+    background: var(--c-green);
+    color: var(--c-white);
+  }
+
+  .steps__line {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+    transform-origin: left;
+
+    @include down(lg) {
+      display: none;
+    }
+  }
+
+  .steps__title {
+    @include label;
+    font-size: 0.75rem;
+  }
+
+  .steps__text {
+    font-size: var(--fs-small);
+    color: var(--muted);
+    max-width: 22ch;
+  }
+</style>

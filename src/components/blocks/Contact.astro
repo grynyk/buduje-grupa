@@ -1,0 +1,153 @@
+---
+import type { BlockOf } from '@/content.config';
+import ContactForm from '@/components/ContactForm.astro';
+import SocialLinks from '@/components/SocialLinks.astro';
+import { getSettings, mapUrl, telHref } from '@/lib/content';
+
+type Props = BlockOf<'contact'>;
+const { eyebrow, title, text, formTitle, choicesLabel, choices, note } = Astro.props;
+const settings = await getSettings();
+const map = mapUrl(settings.socials);
+
+const rows = [
+  settings.phone && { label: 'Telefon', value: settings.phone, href: telHref(settings.phone) },
+  settings.email && { label: 'E-mail', value: settings.email, href: `mailto:${settings.email}` },
+  settings.address && { label: 'Biuro', value: [settings.address, settings.city].filter(Boolean).join(', '), href: map, external: true },
+  settings.hours && { label: 'Godziny', value: settings.hours },
+].filter(Boolean) as { label: string; value: string; href?: string; external?: boolean }[];
+---
+
+<section class="contact-page theme-light" data-hero>
+  <div class="container contact-page__grid">
+    <div class="contact-page__info">
+      {eyebrow && <p class="eyebrow" data-hero-fade>{eyebrow}</p>}
+      {
+        title && (
+          <h1 class="contact-page__title">
+            <span class="contact-page__line">
+              <span data-hero-line>{title}</span>
+            </span>
+          </h1>
+        )
+      }
+      {text && <p class="contact-page__text" data-hero-fade>{text}</p>}
+
+      <dl class="contact-page__rows" data-reveal-stagger>
+        {
+          rows.map((r) => (
+            <div>
+              <dt>{r.label}</dt>
+              <dd>
+                {r.href ? (
+                  <a href={r.href} target={r.external ? '_blank' : undefined} rel={r.external ? 'noopener noreferrer' : undefined}>
+                    {r.value}
+                  </a>
+                ) : (
+                  r.value
+                )}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+      <SocialLinks socials={settings.socials} class="contact-page__socials" />
+    </div>
+
+    <div class="contact-page__card" data-reveal>
+      {formTitle && <h2 class="contact-page__card-title">{formTitle}</h2>}
+      <ContactForm chipsLabel={choicesLabel} chips={choices} note={note} id="kontakt" />
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  .contact-page {
+    padding-top: calc(var(--header-h) + clamp(3.5rem, 7vw, 6.5rem));
+    padding-bottom: var(--section-y);
+  }
+
+  .contact-page__grid {
+    display: grid;
+    gap: 3rem clamp(3rem, 6vw, 6rem);
+
+    @include up(lg) {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+  }
+
+  .contact-page__info {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .contact-page__title {
+    @include display(var(--fs-h1));
+    line-height: 1.05;
+    max-width: 12ch;
+  }
+
+  .contact-page__line {
+    display: block;
+    overflow: hidden;
+    padding-block: 0.08em;
+    margin-block: -0.08em;
+
+    > span {
+      display: block;
+    }
+  }
+
+  .contact-page__text {
+    max-width: 32rem;
+    color: var(--muted);
+  }
+
+  .contact-page__rows {
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--line);
+
+    > div {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.25rem 1.5rem;
+      padding-block: 0.95rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    dt {
+      @include label;
+      color: var(--muted);
+    }
+
+    dd {
+      font-size: var(--fs-small);
+    }
+
+    a {
+      background: linear-gradient(currentColor, currentColor) no-repeat right bottom / 0 1px;
+      transition: background-size 0.4s var(--ease-out);
+
+      @include hover {
+        background-size: 100% 1px;
+      }
+    }
+  }
+
+  .contact-page__info :global(.contact-page__socials) {
+    --socials-size: 1.375rem;
+    color: var(--c-green);
+  }
+
+  .contact-page__card {
+    --field-bg: var(--c-white);
+    padding: clamp(1.5rem, 3.5vw, 2.5rem);
+    background: var(--c-paper);
+  }
+
+  .contact-page__card-title {
+    @include display(var(--fs-h3));
+    margin-bottom: 1.25rem;
+  }
+</style>

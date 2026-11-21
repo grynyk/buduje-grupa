@@ -1,0 +1,307 @@
+---
+/**
+ * Office map band (Kontakt, O nas): interactive OpenStreetMap (MapLibre + OpenFreeMap)
+ * with the brand marker and an address card. The map library loads only when the band
+ * scrolls near the viewport; without JS (or if the map fails) the card still shows.
+ */
+import type { BlockOf } from '@/content.config';
+import Logo from '@/components/Logo.astro';
+import { centredMark } from '@/lib/brand';
+import { getSettings, mapUrl, telHref } from '@/lib/content';
+
+type Props = BlockOf<'map'>;
+const settings = await getSettings();
+const listing = mapUrl(settings.socials);
+const geo = settings.geo;
+const address = [settings.address, settings.city].filter(Boolean).join(', ');
+const directions = geo
+  ? `https://www.google.com/maps/dir/?api=1&destination=${geo.lat},${geo.lng}`
+  : listing;
+const markerSvg = centredMark;
+---
+
+<section class="mapband" aria-label="Mapa dojazdu do biura">
+  {
+    geo && (
+      <div
+        class="mapband__map"
+        data-map
+        data-lat={geo.lat}
+        data-lng={geo.lng}
+        data-zoom="15"
+        data-marker-svg={markerSvg}
+        role="region"
+        aria-label={`Mapa: ${address}`}
+      />
+    )
+  }
+
+  <div class="container mapband__overlay">
+    <div class="mapband__card" data-map-card>
+      <p class="eyebrow">{Astro.props.label || 'Biuro'}</p>
+      <p class="mapband__name">
+        <Logo class="mapband__logo" />
+        <span class="sr-only">{settings.companyName}</span>
+      </p>
+      <dl class="mapband__rows">
+        <div>
+          <dt>Adres</dt>
+          <dd>
+            <address>
+              {settings.address}
+              <br />
+              {settings.city}
+            </address>
+          </dd>
+        </div>
+        {
+          settings.hours && (
+            <div>
+              <dt>Godziny</dt>
+              <dd>{settings.hours}</dd>
+            </div>
+          )
+        }
+        {
+          settings.phone && (
+            <div>
+              <dt>Telefon</dt>
+              <dd>
+                <a href={telHref(settings.phone)}>{settings.phone}</a>
+              </dd>
+            </div>
+          )
+        }
+      </dl>
+      <div class="mapband__actions">
+        {directions && (
+          <a href={directions} class="btn" target="_blank" rel="noopener noreferrer">
+            Wyznacz trasę
+          </a>
+        )}
+        {listing && (
+          <a href={listing} class="btn btn--ghost" target="_blank" rel="noopener noreferrer">
+            Google Maps
+          </a>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Load MapLibre only when the map is ~300px from the viewport.
+  const el = document.querySelector<HTMLElement>('[data-map]');
+  if (el) {
+    const io = new IntersectionObserver(
+      async (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        try {
+          const { mountMap } = await import('@/scripts/map');
+          mountMap(el);
+        } catch (err) {
+          console.warn('[map] could not load', err);
+        }
+      },
+      { rootMargin: '300px 0px' },
+    );
+    io.observe(el);
+  }
+</script>
+
+<style lang="scss">
+  // Map fills the band edge to edge; the address card floats over it on wide screens.
+  .mapband {
+    position: relative;
+    isolation: isolate;
+    background: var(--c-sage); // shown until tiles load / without JS
+    border-block: 1px solid var(--line);
+
+    @include up(lg) {
+      min-height: clamp(26rem, 38vw, 34rem);
+    }
+  }
+
+  .mapband__map {
+    height: clamp(20rem, 60vw, 26rem);
+    opacity: 0;
+    transition: opacity 0.6s;
+
+    &:global(.is-ready) {
+      opacity: 1;
+    }
+
+    @include up(lg) {
+      position: absolute;
+      inset: 0;
+      height: auto;
+    }
+  }
+
+  .mapband__overlay {
+    position: relative;
+    z-index: 1;
+    pointer-events: none; // let the map receive drags around the card
+
+    @include up(lg) {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .mapband__card {
+    pointer-events: auto;
+    display: grid;
+    gap: 1rem;
+    padding: clamp(1.5rem, 2.5vw, 2rem);
+    margin-block: 1.5rem;
+    background: var(--c-white);
+    box-shadow: 0 18px 40px -20px rgb(6 52 36 / 0.35);
+
+    @include up(lg) {
+      width: 24rem;
+      margin: 0;
+    }
+  }
+
+  // the brand wordmark itself (one vector), not mark + typed text
+  .mapband__name {
+    display: flex;
+    margin-block: 0.15rem 0.35rem;
+    color: var(--c-green);
+
+    :global(.mapband__logo) {
+      height: 1.125rem;
+    }
+  }
+
+  // label / value rows with hairlines — same pattern as the Kontakt details
+  .mapband__rows {
+    border-top: 1px solid var(--line);
+
+    > div {
+      display: grid;
+      grid-template-columns: 5.5rem 1fr;
+      align-items: baseline; // label and value share one text baseline
+      gap: 1rem;
+      padding-block: 0.8rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    dt {
+      @include label;
+      color: var(--muted);
+    }
+
+    dd {
+      font-size: var(--fs-small);
+      line-height: 1.5;
+    }
+
+    address {
+      font-style: normal;
+    }
+  }
+
+  // two equal buttons, same height, filling the card width
+  .mapband__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+
+    :global(.btn) {
+      padding-inline: 1rem;
+    }
+  }
+
+  /* ---------- MapLibre UI in brand style ---------- */
+  // Classic upright map pin (teardrop) with the BG® mark; pulse ring marks the exact point.
+  // MapLibre owns the transform of .map-marker, so everything is styled on .map-pin.
+  .mapband :global(.map-pin) {
+    position: relative;
+    display: block;
+    width: 3rem;
+    height: 3.75rem;
+  }
+
+  .mapband :global(.map-pin__shape) {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 6px 8px rgb(6 52 36 / 0.35));
+  }
+
+  // injected by MapLibre at runtime → must be global to match
+  .mapband :global(.map-pin__shape path) {
+    fill: var(--c-green);
+    stroke: var(--c-white);
+    stroke-width: 2.5;
+  }
+
+  .mapband :global(.map-pin__logo) {
+    position: absolute;
+    z-index: 2;
+    // head circle centre = 22.6/60 of the pin height (from the pin path); letters centred there
+    top: calc(3.75rem * 22.6 / 60);
+    left: 50%;
+    width: 1.3rem;
+    transform: translate(-50%, -50%);
+    color: var(--c-white);
+    line-height: 0;
+  }
+
+  .mapband :global(.map-pin__logo svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .mapband :global(.map-pin__pulse) {
+    position: absolute;
+    left: 50%;
+    bottom: -0.3rem;
+    width: 1.5rem;
+    height: 0.6rem;
+    margin-left: -0.75rem;
+    border-radius: 50%;
+    background: rgb(6 52 36 / 0.35);
+
+    @include motion-ok {
+      animation: pin-pulse 2.2s var(--ease-out) infinite;
+    }
+  }
+
+  @keyframes pin-pulse {
+    0% {
+      transform: scale(0.6);
+      opacity: 0.9;
+    }
+    100% {
+      transform: scale(2.4);
+      opacity: 0;
+    }
+  }
+
+  .mapband :global(.maplibregl-ctrl-group) {
+    border-radius: 0;
+    box-shadow: 0 0 0 1px var(--line);
+  }
+
+  .mapband :global(.maplibregl-ctrl-attrib) {
+    font-size: 0.6875rem;
+  }
+
+  .mapband :global(.maplibregl-cooperative-gesture-screen) {
+    background: rgb(6 52 36 / 0.6);
+    font-family: var(--f-body);
+    font-size: 1rem;
+  }
+</style>

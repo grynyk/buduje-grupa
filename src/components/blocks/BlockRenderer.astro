@@ -1,0 +1,56 @@
+---
+import type { Block } from '@/content.config';
+import Features from './Features.astro';
+import People from './People.astro';
+import Quote from './Quote.astro';
+import MediaText from './MediaText.astro';
+import Packages from './Packages.astro';
+import Steps from './Steps.astro';
+import Timeline from './Timeline.astro';
+import Commitment from './Commitment.astro';
+import Guide from './Guide.astro';
+import Stats from './Stats.astro';
+import Layers from './Layers.astro';
+import Faq from './Faq.astro';
+import Articles from './Articles.astro';
+import Schedule from './Schedule.astro';
+import Estimate from './Estimate.astro';
+import Cta from './Cta.astro';
+import Catalog from './Catalog.astro';
+import Contact from './Contact.astro';
+import MapBand from './MapBand.astro';
+
+interface Props {
+  blocks: Block[];
+}
+const { blocks } = Astro.props;
+
+const components = {
+  features: Features,
+  people: People,
+  quote: Quote,
+  mediaText: MediaText,
+  packages: Packages,
+  steps: Steps,
+  timeline: Timeline,
+  commitment: Commitment,
+  guide: Guide,
+  stats: Stats,
+  layers: Layers,
+  faq: Faq,
+  articles: Articles,
+  schedule: Schedule,
+  estimate: Estimate,
+  cta: Cta,
+  catalog: Catalog,
+  contact: Contact,
+  map: MapBand,
+} as const;
+---
+
+{
+  blocks.map((block) => {
+    const Component = components[block._template] as (props: Block) => any;
+    return <Component {...block} />;
+  })
+}

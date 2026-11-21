@@ -1,0 +1,70 @@
+---
+/** Photo grid for detail pages (2 columns; an odd count makes the first photo wide). */
+import ZoomImage from './ZoomImage.astro';
+
+interface Props {
+  images: string[];
+  alt: (i: number) => string;
+  label?: string;
+  /** total photos on the page incl. the cover, for the counter */
+  total?: number;
+}
+const { images, alt, label = 'Galeria', total = images.length } = Astro.props;
+const photos = (n: number) => (n === 1 ? 'zdjęcie' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'zdjęcia' : 'zdjęć');
+---
+
+{
+  images.length > 0 && (
+    <div class="gallery">
+      <div class="gallery__head">
+        <p class="eyebrow">{label}</p>
+        <p class="gallery__count">
+          {total} {photos(total)}
+        </p>
+      </div>
+      <ul role="list" class="gallery__grid" data-reveal-stagger>
+        {images.map((src, i) => (
+          <li class:list={[{ 'gallery__wide': images.length % 2 === 1 && i === 0 }]}>
+            <ZoomImage src={src} alt={alt(i)} variant={images.length % 2 === 1 && i === 0 ? 'wide' : 'photo'} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+<style lang="scss">
+  .gallery {
+    margin-top: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .gallery__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: clamp(1rem, 2vw, 1.5rem);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .gallery__count {
+    @include label;
+    color: var(--muted);
+  }
+
+  .gallery__grid {
+    display: grid;
+    gap: clamp(0.75rem, 1.5vw, 1.25rem);
+
+    @include up(md) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .gallery__wide {
+    @include up(md) {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

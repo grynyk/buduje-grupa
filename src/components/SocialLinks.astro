@@ -1,0 +1,69 @@
+---
+/**
+ * Social / map links with the brand icon set (Instagram, Facebook, YouTube, map pin).
+ * Icons come from the brand files (src/assets/icons) and follow `currentColor`.
+ */
+import instagram from '@/assets/icons/instagram.svg?raw';
+import facebook from '@/assets/icons/facebook.svg?raw';
+import youtube from '@/assets/icons/youtube.svg?raw';
+import pin from '@/assets/icons/pin.svg?raw';
+import { socialIcon, type Settings } from '@/lib/content';
+
+interface Props {
+  socials: Settings['socials'];
+  class?: string;
+}
+const { socials, class: className } = Astro.props;
+const icons = { instagram, facebook, youtube, map: pin };
+const svg = (raw: string) => raw.replace('<svg ', '<svg aria-hidden="true" focusable="false" ');
+---
+
+{
+  socials.length > 0 && (
+    <ul role="list" class:list={['socials', className]}>
+      {socials.map((s) => {
+        const external = /^https?:\/\//.test(s.url);
+        return (
+          <li>
+            <a
+              href={s.url}
+              aria-label={s.label}
+              title={s.label}
+              target={external ? '_blank' : undefined}
+              rel={external ? 'noopener noreferrer' : undefined}
+              set:html={svg(icons[socialIcon(s)])}
+            />
+          </li>
+        );
+      })}
+    </ul>
+  )
+}
+
+<style lang="scss">
+  .socials {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--socials-gap, 1.5rem);
+
+    a {
+      display: grid;
+      place-items: center;
+      color: currentColor;
+      transition:
+        opacity 0.3s,
+        transform 0.3s var(--ease-out);
+
+      @include hover {
+        opacity: 0.7;
+        transform: translateY(-2px);
+      }
+    }
+
+    :global(svg) {
+      width: var(--socials-size, 1.5rem);
+      height: var(--socials-size, 1.5rem);
+    }
+  }
+</style>

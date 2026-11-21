@@ -1,0 +1,45 @@
+{
+  "seo": {
+    "title": "O nas — BUDUJE GRUPA",
+    "description": "Mały zespół projektantów, inżynierów i cieśli. Budujemy całoroczne domy szkieletowe i bierzemy odpowiedzialność za każdy z nich."
+  },
+  "prefooter": "visit",
+  "hero": {
+    "layout": "image-side",
+    "eyebrow": "O nas — mała firma, konkretni ludzie",
+    "title": "Mały zespół. Duża odpowiedzialność za każdy dom.",
+    "text": "Nie jesteśmy korporacją. Jesteśmy zespołem projektantów, inżynierów i cieśli, którzy znają każdą budowę z imienia i nazwiska inwestora. Dzięki temu decyzje zapadają szybko, a Ty zawsze wiesz, z kim rozmawiasz.",
+    "image": "/images/zespol.jpg",
+    "imageAlt": "Zespół BUDUJE GRUPA przy pracy nad projektem domu"
+  },
+  "blocks": [
+    {
+      "_template": "map"
+    },
+    {
+      "_template": "people",
+      "eyebrow": "Nasz zespół",
+      "items": [
+        {
+          "name": "Piotr Hochół",
+          "role": "[rola]",
+          "initials": "PH"
+        },
+        {
+          "name": "Ivan Shevchenko",
+          "role": "[rola]",
+          "initials": "IS"
+        },
+        {
+          "name": "Kateryna Putko",
+          "role": "[rola]",
+          "initials": "KP"
+        }
+      ],
+      "title": "Rozmawiasz z ludźmi, którzy budują.",
+      "text": "Mały zespół, który zna każdą budowę osobiście — od pierwszej rozmowy aż po odbiór kluczy.",
+      "quote": "„Budujemy tak, jakbyśmy budowali dla siebie.”",
+      "signature": "Zespół BUDUJE GRUPA"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+---
+import type { BlockOf } from '@/content.config';
+
+type Props = BlockOf<'quote'>;
+const { text, button } = Astro.props;
+---
+
+<section class="section quote-block theme-dark">
+  <div class="container quote-block__inner">
+    <blockquote class="quote-block__text" data-split>{text}</blockquote>
+    {
+      button && (
+        <a href={button.href} class="btn" data-reveal>
+          {button.label}
+        </a>
+      )
+    }
+  </div>
+</section>
+
+<style lang="scss">
+  .quote-block__inner {
+    display: grid;
+    justify-items: center;
+    gap: 2.5rem;
+    text-align: center;
+  }
+
+  .quote-block__text {
+    @include display(clamp(1.75rem, 1.2rem + 2vw, 3rem));
+    max-width: 26ch;
+  }
+</style>

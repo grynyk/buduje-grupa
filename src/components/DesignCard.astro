@@ -1,0 +1,97 @@
+---
+/** Catalog design card: image · TITLE + "Zobacz projekt →" · area / rooms / feature. */
+import type { CollectionEntry } from 'astro:content';
+import Icon from './Icon.astro';
+
+interface Props {
+  design: CollectionEntry<'catalog'>;
+  headingLevel?: 'h2' | 'h3';
+}
+const { design, headingLevel: Heading = 'h2' } = Astro.props;
+const d = design.data;
+---
+
+<a href={`/katalog/${design.id}`} class="design">
+  <div class="design__media">
+    <img src={d.image} alt={`Projekt domu ${d.title}`} loading="lazy" width="1024" height="1280" />
+  </div>
+  <div class="design__head">
+    <Heading class="design__title">{d.title}</Heading>
+    <span class="design__more">
+      Zobacz projekt <Icon name="arrow-right" />
+    </span>
+  </div>
+  <ul role="list" class="design__meta">
+    <li>{d.area} m²</li>
+    <li>{d.rooms}</li>
+    {d.feature && <li>{d.feature}</li>}
+  </ul>
+</a>
+
+<style lang="scss">
+  .design {
+    display: block;
+  }
+
+  .design__media {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--bg-alt);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 1.1s var(--ease-out);
+    }
+  }
+
+  .design__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 1rem 0.85rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .design__title {
+    @include display(clamp(1.375rem, 1.2rem + 0.6vw, 1.75rem));
+    text-transform: uppercase;
+  }
+
+  .design__more {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    gap: 0.4rem;
+    @include label;
+    font-size: 0.625rem;
+
+    :global(.icon) {
+      width: 0.875rem;
+      stroke-width: 1.5;
+      transition: transform 0.4s var(--ease-out);
+    }
+  }
+
+  .design__meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    padding-top: 0.85rem;
+    font-size: var(--fs-small);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .design:hover {
+      .design__media img {
+        transform: scale(1.04);
+      }
+
+      .design__more :global(.icon) {
+        transform: translateX(3px);
+      }
+    }
+  }
+</style>

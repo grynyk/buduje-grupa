@@ -1,0 +1,192 @@
+---
+import type { BlockOf } from '@/content.config';
+import Logo from '@/components/Logo.astro';
+
+type Props = BlockOf<'mediaText'>;
+const { image, imageAlt = '', eyebrow, title, text, items, note, button, reverse, theme } = Astro.props;
+---
+
+<section class:list={['media-text', `theme-${theme}`, { 'media-text--reverse': reverse, 'media-text--bleed': theme === 'paper' }]}>
+  <div class="media-text__inner">
+    <figure class="media-text__media" data-clip-reveal>
+      <img src={image} alt={imageAlt} loading="lazy" width="1024" height="1280" />
+    </figure>
+
+    <div class="media-text__body">
+      {eyebrow && <p class="eyebrow" data-reveal>{eyebrow}</p>}
+      {title && <h2 class="media-text__title" data-split>{title}</h2>}
+      {text && <p class="media-text__text" data-reveal>{text}</p>}
+
+      {
+        items.length > 0 && (
+          <ul role="list" class="media-text__list" data-reveal-stagger>
+            {items.map((item) => (
+              <li>
+                <h3 class="media-text__item-title">{item.title}</h3>
+                {item.text && <p class="media-text__item-text">{item.text}</p>}
+              </li>
+            ))}
+          </ul>
+        )
+      }
+
+      {
+        note && (
+          <div class="media-text__note" data-reveal>
+            <span class="media-text__seal" aria-hidden="true">
+              <Logo variant="mark-centred" class="media-text__seal-logo" />
+            </span>
+            <p>{note}</p>
+          </div>
+        )
+      }
+
+      {
+        button && (
+          <a href={button.href} class="btn media-text__btn" data-reveal>
+            {button.label}
+          </a>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  // Default: contained two-column section. Paper variant: image bleeds to the viewport edge (brand mockup).
+  .media-text {
+    padding-block: var(--section-y);
+  }
+
+  .media-text__inner {
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 5rem);
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+
+    @include up(lg) {
+      grid-template-columns: 1fr 1.1fr;
+      align-items: start;
+    }
+  }
+
+  .media-text--reverse .media-text__media {
+    @include up(lg) {
+      order: 2;
+    }
+  }
+
+  .media-text__media {
+    overflow: hidden;
+    aspect-ratio: 1;
+    background: var(--bg-alt);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .media-text--bleed {
+    padding-block: 0;
+
+    .media-text__inner {
+      max-width: none;
+      padding-inline: 0;
+      gap: 0;
+
+      @include up(lg) {
+        grid-template-columns: 1fr 1fr;
+        align-items: stretch;
+      }
+    }
+
+    .media-text__media {
+      aspect-ratio: 4 / 3;
+
+      @include up(lg) {
+        aspect-ratio: auto;
+        min-height: 32rem;
+      }
+    }
+
+    .media-text__body {
+      align-self: center;
+      padding: clamp(3rem, 6vw, 5rem) var(--gutter);
+
+      @include up(lg) {
+        padding-inline: clamp(2.5rem, 5vw, 4.5rem);
+        max-width: 40rem;
+      }
+    }
+  }
+
+  .media-text__body {
+    display: grid;
+    gap: 1.25rem;
+    align-content: start;
+  }
+
+  .media-text__title {
+    @include display(clamp(1.75rem, 1.4rem + 1.3vw, 2.5rem));
+  }
+
+  .media-text__text {
+    color: var(--muted);
+    max-width: 34rem;
+  }
+
+  .media-text__list {
+    border-top: 1px solid var(--line);
+    margin-top: 0.25rem;
+
+    li {
+      display: grid;
+      gap: 0.35rem;
+      padding-block: 1.1rem;
+      border-bottom: 1px solid var(--line);
+    }
+  }
+
+  .media-text__item-title {
+    @include label;
+    font-size: 0.75rem;
+  }
+
+  .media-text__item-text {
+    font-size: var(--fs-small);
+    color: var(--muted);
+  }
+
+  .media-text__note {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    margin-top: 0.5rem;
+    background: var(--c-paper);
+    font-size: var(--fs-small);
+  }
+
+  .media-text__seal {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    border: 1px solid var(--c-green);
+  }
+
+  .media-text__seal :global(.media-text__seal-logo) {
+    height: 0.85rem;
+  }
+
+  .media-text__btn {
+    justify-self: start;
+    margin-top: 0.5rem;
+  }
+</style>

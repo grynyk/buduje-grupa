@@ -1,0 +1,27 @@
+# build output
+dist/
+.astro/
+
+# dependencies (Yarn Berry, node_modules linker)
+node_modules/
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# TinaCMS generated admin + local DB
+public/admin/
+tina/__generated__/
+
+# env
+.env
+.env.production
+
+# misc
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
