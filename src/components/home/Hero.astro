@@ -8,17 +8,19 @@
  *   │ Title line 2                     │ subtitle          │
  *   │ Title line 3 ── baseline ────────┼─ buttons (bottom) │
  *   ├──────────── hairline across all 12 columns ──────────┤
- *   │ stat 1          │ stat 2         │ stat 3       (↓)  │
+ *   │ stat 1          │ stat 2         │ stat 3 │ ◎ f ▶ ⌖ (↓) │
  *   └─────────────────┴────────────────┴───────────────────┘
  *  Stat 3 starts on col 8, i.e. exactly under the subtitle column.
  */
 import Icon from '@/components/Icon.astro';
-import type { Home } from '@/lib/content';
+import SocialLinks from '@/components/SocialLinks.astro';
+import type { Home, Settings } from '@/lib/content';
 
 interface Props {
   data: Home['hero'];
+  socials?: Settings['socials'];
 }
-const { data } = Astro.props;
+const { data, socials = [] } = Astro.props;
 ---
 
 <section class="hero theme-dark" data-hero>
@@ -72,9 +74,12 @@ const { data } = Astro.props;
               </li>
             ))}
           </ul>
-          <a href="#o-nas" class="hero__scroll" data-hero-fade aria-label="Przewiń do sekcji O nas">
-            <Icon name="arrow-down" />
-          </a>
+          <div class="hero__links" data-hero-fade>
+            <SocialLinks socials={socials} class="hero__socials" />
+            <a href="#o-nas" class="hero__scroll" aria-label="Przewiń do sekcji O nas">
+              <Icon name="arrow-down" />
+            </a>
+          </div>
         </div>
       )
     }
@@ -250,7 +255,7 @@ const { data } = Astro.props;
       }
 
       &:nth-child(3) {
-        grid-column: 8 / span 4; // aligned with the subtitle column
+        grid-column: 8 / span 2; // aligned with the subtitle column
       }
     }
 
@@ -272,6 +277,29 @@ const { data } = Astro.props;
     }
   }
 
+  // social icons + scroll arrow, right edge of the stats row
+  .hero__links {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--hero-gap);
+    margin-top: 1.5rem;
+
+    @include up(lg) {
+      grid-column: 10 / -1;
+      grid-row: 1;
+      justify-content: flex-end;
+      gap: clamp(1.5rem, 2.5vw, 2.5rem);
+      margin-top: 0;
+    }
+  }
+
+  .hero__links :global(.hero__socials) {
+    --socials-size: 1.25rem;
+    --socials-gap: clamp(1rem, 1.6vw, 1.5rem);
+    flex-wrap: nowrap;
+  }
+
   .hero__scroll {
     display: none;
     place-items: center;
@@ -291,9 +319,6 @@ const { data } = Astro.props;
 
     @include up(lg) {
       display: grid;
-      grid-column: 12;
-      grid-row: 1;
-      justify-self: end;
     }
 
     @include hover {

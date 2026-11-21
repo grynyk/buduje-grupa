@@ -2,7 +2,6 @@
 import Logo from './Logo.astro';
 import Icon from './Icon.astro';
 import SocialLinks from './SocialLinks.astro';
-import GoogleRating from './GoogleRating.astro';
 import { mapUrl, telHref, type Settings } from '@/lib/content';
 import { NAV } from '@/lib/nav';
 
@@ -68,11 +67,7 @@ const map = mapUrl(settings.socials);
           }
           {settings.hours && <li>{settings.hours}</li>}
         </ul>
-        <!-- icons and rating share one width: icons spread edge to edge above the pill -->
-        <div class="footer__connect">
-          <SocialLinks socials={settings.socials} class="footer__socials" />
-          <GoogleRating compact class="footer__rating" />
-        </div>
+        <SocialLinks socials={settings.socials} class="footer__socials" />
       </div>
     </div>
 
@@ -194,47 +189,10 @@ const map = mapUrl(settings.socials);
     }
   }
 
-  // Social icons + Google rating as one block, as wide as the rating pill:
-  // four outlined pill buttons (same height + radius as the rating) in equal columns
-  .footer__connect {
-    --pill-h: 2.25rem;
-    display: inline-grid;
-    gap: 0.5rem;
+  // Plain brand icons, as on the contact page
+  .footer__col :global(.footer__socials) {
+    --socials-size: 1.375rem;
     margin-top: 1.75rem;
-  }
-
-  .footer__connect :global(.footer__socials) {
-    --socials-size: 1.125rem;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.5rem;
-  }
-
-  .footer__connect :global(.footer__socials a) {
-    height: var(--pill-h);
-    border: 1px solid rgb(255 255 255 / 0.22);
-    border-radius: var(--radius);
-    transition:
-      background 0.3s,
-      color 0.3s,
-      border-color 0.3s;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .footer__connect :global(.footer__socials a:hover) {
-      background: var(--c-white);
-      border-color: var(--c-white);
-      color: var(--c-green);
-      opacity: 1;
-      transform: none;
-    }
-  }
-
-  .footer__connect :global(.footer__rating) {
-    display: flex;
-    justify-content: center;
-    height: var(--pill-h);
-    padding-block: 0;
   }
 
   // Faded brand wordmark — a quiet signature, not a second headline (home page only)

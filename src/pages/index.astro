@@ -28,7 +28,7 @@ const stats = google
 ---
 
 <BaseLayout title={home.seo.title} description={home.seo.description} image={home.hero.image}>
-  <Hero data={hero} />
+  <Hero data={hero} socials={settings.socials} />
   <Marquee items={home.marquee} />
   <About data={home.about} stats={stats} />
   <Projects intro={home.projects} projects={(featured.length ? featured : projects).slice(0, 3)} total={projects.length} />
