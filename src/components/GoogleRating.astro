@@ -48,7 +48,7 @@ const fill = rating ? Math.min(100, (rating.score / 5) * 100) : 0;
     align-items: center;
     gap: 0.85rem;
     padding: 0.8rem 1.25rem;
-    border-radius: 0.875rem;
+    border-radius: var(--radius);
     background: var(--c-white);
     color: #3c4043;
     box-shadow: 0 6px 24px -10px rgb(6 52 36 / 0.35);
@@ -104,11 +104,11 @@ const fill = rating ? Math.min(100, (rating.score / 5) * 100) : 0;
     margin-top: -0.1rem;
   }
 
-  // slim pill for the footer
+  // slim bar for the footer (square, like every button)
   .g-rating--compact {
     gap: 0.5rem;
     padding: 0.45rem 0.85rem;
-    border-radius: 99px;
+    border-radius: var(--radius);
     box-shadow: none;
 
     .g-rating__row {

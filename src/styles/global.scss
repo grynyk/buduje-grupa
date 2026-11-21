@@ -349,7 +349,7 @@ p {
   }
 }
 
-// Pill filters / chips
+// Filter chips / tags (square, like buttons)
 .pill {
   display: inline-flex;
   align-items: center;
@@ -359,7 +359,7 @@ p {
   line-height: 1;
   color: var(--fg);
   border: 1px solid var(--line);
-  border-radius: 99px;
+  border-radius: var(--radius);
   background: transparent;
   transition:
     background 0.3s,
