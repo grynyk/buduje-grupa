@@ -1,0 +1,116 @@
+---
+/** All realizations in a grid, with category filter pills and a live count (Realizacje page). */
+import ProjectCard from '@/components/cards/ProjectCard.astro';
+import { getProjects } from '@/lib/content';
+import type { BlockOf } from '@/schemas/blocks';
+
+type Props = BlockOf<'projectList'>;
+const { allLabel } = Astro.props;
+
+const projects = await getProjects();
+const categories = [...new Set(projects.map((p) => p.data.category))];
+---
+
+<section class="listing theme-light" data-filter-root>
+  <div class="container">
+    <!-- Filter bar: one row of pills (scrolls sideways on small screens) + live count -->
+    <div class="listing__bar">
+      <div class="listing__filters" role="group" aria-label="Filtruj realizacje">
+        <button type="button" class="pill is-active" data-filter="*" aria-pressed="true">{allLabel}</button>
+        {
+          categories.map((c) => (
+            <button type="button" class="pill" data-filter={c} aria-pressed="false">
+              {c}
+            </button>
+          ))
+        }
+      </div>
+      <p class="listing__count" aria-live="polite" data-filter-count>Wyświetlono: {projects.length}</p>
+    </div>
+
+    <ul role="list" class="listing__grid card-grid" data-reveal-stagger>
+      {
+        projects.map((p, i) => (
+          <li data-item data-tags={p.data.category}>
+            <ProjectCard project={p} index={i} headingLevel="h2" />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<script>
+  import { initFilter } from '@/scripts/filter';
+  initFilter();
+</script>
+
+<style lang="scss">
+  .listing {
+    padding-bottom: var(--section-y);
+  }
+
+  .listing__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    padding-bottom: 1.25rem;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .listing__filters {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    // let focus rings / pill borders breathe inside the scroller
+    padding: 2px;
+    margin: -2px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    :global(.pill) {
+      flex: none;
+      white-space: nowrap;
+    }
+  }
+
+  .listing__count {
+    flex: none;
+    @include label;
+    color: var(--muted);
+
+    @include down(md) {
+      display: none;
+    }
+  }
+
+  // Strict grid: equal columns, equal gaps, no stagger. Rows are shared via .card-grid (see ProjectCard).
+  .listing__grid {
+    display: grid;
+    column-gap: clamp(1rem, 2vw, 1.5rem);
+    row-gap: 0;
+
+    @include up(md) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @include up(lg) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    > li {
+      padding-bottom: clamp(2.5rem, 4vw, 3.5rem);
+    }
+
+    > li[hidden] {
+      display: none;
+    }
+  }
+</style>

@@ -1,6 +1,6 @@
 ---
-import type { BlockOf } from '@/content.config';
-import { pad } from '@/lib/content';
+import type { BlockOf } from '@/schemas/blocks';
+import { pad } from '@/lib/format';
 
 type Props = BlockOf<'steps'>;
 const { eyebrow, items } = Astro.props;

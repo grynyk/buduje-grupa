@@ -1,6 +1,7 @@
 ---
 /** Photo grid for detail pages (2 columns; an odd count makes the first photo wide). */
 import ZoomImage from './ZoomImage.astro';
+import { plural } from '@/lib/format';
 
 interface Props {
   images: string[];
@@ -10,7 +11,6 @@ interface Props {
   total?: number;
 }
 const { images, alt, label = 'Galeria', total = images.length } = Astro.props;
-const photos = (n: number) => (n === 1 ? 'zdjęcie' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'zdjęcia' : 'zdjęć');
 ---
 
 {
@@ -19,7 +19,7 @@ const photos = (n: number) => (n === 1 ? 'zdjęcie' : [2, 3, 4].includes(n % 10)
       <div class="gallery__head">
         <p class="eyebrow">{label}</p>
         <p class="gallery__count">
-          {total} {photos(total)}
+          {total} {plural(total, ['zdjęcie', 'zdjęcia', 'zdjęć'])}
         </p>
       </div>
       <ul role="list" class="gallery__grid" data-reveal-stagger>

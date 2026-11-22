@@ -1,58 +1,55 @@
 ---
+/**
+ * Document shell for every page: <head> (SEO, social cards, structured data, fonts),
+ * header, optional band above the footer, footer and the animation bundle.
+ */
 import '@fontsource-variable/inter/index.css';
 // Preloaded so the first paint already uses Inter (latin + latin-ext covers Polish ą ę ł ś ż …)
 import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 import interLatinExt from '@fontsource-variable/inter/files/inter-latin-ext-wght-normal.woff2?url';
 import '@/styles/global.scss';
 
-import Header from '@/components/Header.astro';
-import Footer from '@/components/Footer.astro';
-import PreFooter from '@/components/PreFooter.astro';
-import type { PrefooterVariant } from '@/content.config';
+import Header from '@/components/layout/Header.astro';
+import Footer from '@/components/layout/Footer.astro';
+import PreFooter from '@/components/layout/PreFooter.astro';
+import type { PrefooterVariant } from '@/schemas/common';
 import { getSettings } from '@/lib/content';
+import { normalizePath } from '@/lib/format';
+import { shareImage } from '@/lib/images';
+import { breadcrumbs, localBusiness, website, type Crumb, type JsonLd, type PageSeo } from '@/lib/seo';
 
 interface Props {
-  title: string;
-  description?: string;
-  image?: string;
+  /** final <title>, description, share image, noindex */
+  seo: PageSeo;
   /** overlay: transparent header over a photo/green hero; solid: white bar from the start */
   header?: 'overlay' | 'solid';
-  /** Beige band above the footer. Default: "quote" on every page except home (none). */
+  /** Beige band above the footer. */
   prefooter?: PrefooterVariant;
-  /** White prefooter instead of beige (used when the last section above it is beige). */
+  /** White band instead of beige (used when the last section above it is beige). */
   prefooterLight?: boolean;
+  /** Breadcrumb trail after "Strona główna" → BreadcrumbList for Google */
+  crumbs?: Crumb[];
+  /** Extra structured data (FAQ, …) */
+  jsonLd?: (JsonLd | undefined)[];
 }
 
+const { seo, header = 'overlay', prefooter = 'quote', prefooterLight = false, crumbs, jsonLd = [] } = Astro.props;
 const settings = await getSettings();
-const { title, description = settings.tagline, image = '/images/wiezba-dachowa.jpg', header = 'overlay' } = Astro.props;
-const isHome = Astro.url.pathname.replace(/\/+$/, '') === '';
-const prefooter = Astro.props.prefooter ?? (isHome ? 'none' : 'quote');
-const canonical = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL(image, Astro.site);
+const site = Astro.site!;
+const path = normalizePath(Astro.url.pathname);
+const isHome = path === '/';
 
-// Local business structured data (matches the Google Maps listing)
-const [postalCode, ...locality] = (settings.city ?? '').split(' ');
-const sameAs = settings.socials.map((s) => s.url).filter((u) => /^https?:\/\//.test(u));
-const business = {
-  '@context': 'https://schema.org',
-  '@type': 'HomeAndConstructionBusiness',
-  name: settings.legalName ?? settings.companyName,
-  description: settings.tagline,
-  url: Astro.site?.toString(),
-  image: new URL('/images/dom-stodola.jpg', Astro.site).toString(),
-  telephone: settings.phone?.replace(/\s+/g, ''),
-  email: settings.email,
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: settings.address,
-    postalCode,
-    addressLocality: locality.join(' '),
-    addressCountry: 'PL',
-  },
-  ...(settings.geo && { geo: { '@type': 'GeoCoordinates', latitude: settings.geo.lat, longitude: settings.geo.lng } }),
-  ...(settings.openingHours && { openingHours: settings.openingHours }),
-  ...(sameAs.length && { sameAs }),
-};
+const description = seo.description ?? settings.tagline;
+const canonical = new URL(path, site);
+const ogImage = new URL(await shareImage(seo.image ?? settings.seo.image), site);
+const companyImage = new URL(await shareImage(settings.seo.image), site);
+
+const structuredData = [
+  localBusiness(settings, site, companyImage),
+  isHome && website(settings, site),
+  crumbs?.length && breadcrumbs(crumbs, canonical, site),
+  ...jsonLd,
+].filter(Boolean);
 ---
 
 <!doctype html>
@@ -62,20 +59,26 @@ const business = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={interLatinExt} as="font" type="font/woff2" crossorigin />
-    <title>{title}</title>
+
+    <title>{seo.title}</title>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonical} />
+    {seo.noindex && <meta name="robots" content="noindex, follow" />}
+    {settings.seo.googleVerification && <meta name="google-site-verification" content={settings.seo.googleVerification} />}
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#063424" />
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="pl_PL" />
     <meta property="og:site_name" content={settings.companyName} />
-    <meta property="og:title" content={title} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={seo.title} />
     {description && <meta property="og:description" content={description} />}
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
-    <script type="application/ld+json" set:html={JSON.stringify(business)} />
+
+    {structuredData.map((data) => <script type="application/ld+json" set:html={JSON.stringify(data)} />)}
 
     <!-- Animation pre-state: hide reveal targets only when JS + motion are available.
          Failsafe un-hides everything if the animation bundle hasn't started in 2.5s. -->
@@ -95,7 +98,7 @@ const business = {
     <Header settings={settings} variant={header} />
     <main id="main">
       <slot />
-      {prefooter !== 'none' && <PreFooter variant={prefooter} light={Astro.props.prefooterLight} />}
+      {prefooter !== 'none' && <PreFooter variant={prefooter} light={prefooterLight} />}
     </main>
     <Footer settings={settings} wordmark={isHome} />
 

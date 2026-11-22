@@ -1,0 +1,31 @@
+---
+/**
+ * Labelled form field (input or textarea) with its validation message.
+ * `required` adds the "*" to the label; `error` is shown by web3forms.ts when the value is invalid.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = Omit<HTMLAttributes<'input'>, 'id' | 'name'> & {
+  id: string;
+  name: string;
+  label: string;
+  error?: string;
+  /** span both columns of .form__grid */
+  full?: boolean;
+  /** render a <textarea> with this many rows */
+  rows?: number;
+};
+const { id, name, label, error, full = false, rows, required, ...attrs } = Astro.props;
+---
+
+<div class:list={['field', { 'field--full': full }]}>
+  <label for={id} class="form__label">{label}{required && ' *'}</label>
+  {
+    rows ? (
+      <textarea id={id} name={name} rows={rows} required={required} {...(attrs as HTMLAttributes<'textarea'>)} />
+    ) : (
+      <input id={id} name={name} required={required} {...attrs} />
+    )
+  }
+  {error && <p class="field__error" data-error-for={name}>{error}</p>}
+</div>

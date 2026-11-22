@@ -4,20 +4,21 @@
  * with the brand marker and an address card. The map library loads only when the band
  * scrolls near the viewport; without JS (or if the map fails) the card still shows.
  */
-import type { BlockOf } from '@/content.config';
-import Logo from '@/components/Logo.astro';
-import { centredMark } from '@/lib/brand';
-import { getSettings, mapUrl, telHref } from '@/lib/content';
+import type { BlockOf } from '@/schemas/blocks';
+import Logo from '@/components/ui/Logo.astro';
+import { fullAddress, mapUrl } from '@/lib/contact';
+import { getSettings } from '@/lib/content';
+import { telHref } from '@/lib/format';
+import { centredMark } from '@/lib/svg';
 
 type Props = BlockOf<'map'>;
 const settings = await getSettings();
 const listing = mapUrl(settings.socials);
 const geo = settings.geo;
-const address = [settings.address, settings.city].filter(Boolean).join(', ');
+const address = fullAddress(settings);
 const directions = geo
   ? `https://www.google.com/maps/dir/?api=1&destination=${geo.lat},${geo.lng}`
   : listing;
-const markerSvg = centredMark;
 ---
 
 <section class="mapband" aria-label="Mapa dojazdu do biura">
@@ -29,7 +30,7 @@ const markerSvg = centredMark;
         data-lat={geo.lat}
         data-lng={geo.lng}
         data-zoom="15"
-        data-marker-svg={markerSvg}
+        data-marker-svg={centredMark}
         role="region"
         aria-label={`Mapa: ${address}`}
       />

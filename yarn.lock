@@ -1814,6 +1814,7 @@ __metadata:
     maplibre-gl: "npm:^6.19.0"
     sass: "npm:^1.108.2"
     typescript: "npm:^6"
+    yaml: "npm:^2.9.1"
   languageName: unknown
   linkType: soft
 

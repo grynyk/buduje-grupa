@@ -18,7 +18,6 @@
   --c-green: #063424; // forest green: ink, primary actions, dark sections
   --c-green-2: #0b402d; // green, one step lighter: hover / raised surface on green
   --c-paper: #f6f4f0; // warm off-white: containers, cards, bands
-  --c-paper-2: #edede8;
   --c-sage: #dbe0d9; // cool soft surface: testimonials, map
   --c-sage-dark: #8c9e94; // quiet detail on green (secondary text)
   --c-wood: #dbbd8c; // timber — warm detail on light backgrounds only (reads as gold on green)
@@ -52,7 +51,6 @@
   // type — Inter throughout: Light for headings, Regular/Medium for text and labels
   --f-display: 'Inter Variable', 'Inter Fallback', sans-serif;
   --f-body: 'Inter Variable', 'Inter Fallback', sans-serif;
-  --fs-hero: clamp(3rem, 1.2rem + 6.6vw, 7.5rem);
   --fs-h1: clamp(2.5rem, 1.5rem + 3.6vw, 4.75rem);
   --fs-h2: clamp(2rem, 1.35rem + 2.4vw, 3.5rem);
   --fs-h3: clamp(1.375rem, 1.2rem + 0.6vw, 1.75rem);
@@ -65,6 +63,7 @@
   --container: 1440px;
   --gutter: clamp(1rem, 4.5vw, 4.5rem);
   --section-y: clamp(4.5rem, 3rem + 5vw, 8rem);
+  --page-top: calc(var(--header-h) + clamp(3.5rem, 7vw, 6.5rem)); // top padding of a block that opens the page
   --header-h: 5rem;
   --radius: 0;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -222,12 +221,27 @@ p {
   @include eyebrow;
 }
 
-.label {
-  @include label;
-}
-
 .display {
   @include display(var(--fs-h2));
+}
+
+// Heading row: eyebrow + title left, button right (bottom-aligned)
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem 3rem;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+
+  > .btn {
+    flex: none;
+  }
+}
+
+.section-head__text {
+  display: grid;
+  gap: 1.25rem;
 }
 
 .lead {
@@ -435,6 +449,19 @@ p {
   a {
     text-decoration: underline;
     text-underline-offset: 0.2em;
+  }
+}
+
+/* One-line mask for page titles (<Title as="h1">): the hero intro slides the inner span up into view.
+   Padded so tails (y j ą ę) and accents aren't clipped, then the extra space is cancelled. */
+.mask-line {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+
+  > span {
+    display: block;
   }
 }
 

@@ -5,11 +5,14 @@
  *   GOOGLE_PLACES_API_KEY   API key with "Places API (New)" enabled
  *   GOOGLE_PLACE_ID         the listing's Place ID (if empty, it is looked up once by name and printed)
  *   GOOGLE_PLACE_QUERY      optional search text for that lookup
+ *   GOOGLE_PLACES_API_URL   optional API base URL (tests / proxy)
  *
  * Returns null when not configured or when Google is unreachable — callers then fall back to the CMS values,
  * so a build never fails because of this.
  * Data is refreshed on every build; schedule a daily rebuild to keep it current (see README).
  */
+import { getSettings } from './content';
+import { formatNumber } from './format';
 
 export interface GoogleReview {
   author: string;
@@ -114,18 +117,14 @@ let cached: Promise<GooglePlace | null> | undefined;
 export const getGooglePlace = () => (cached ??= load());
 
 /** 5 → "5,0", 4.86 → "4,9" */
-export const formatRating = (value: number) =>
-  new Intl.NumberFormat('pl-PL', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value);
+export const formatRating = (value: number) => formatNumber(value, 1);
 
 /**
  * Rating to display anywhere on the site: live Google data when configured,
- * otherwise the value saved in the CMS (Strona główna → Opinie → Ocena).
+ * otherwise the fallback saved in the CMS (Ustawienia firmy → Ocena Google).
  */
 export async function getRating(): Promise<{ score: number; count: number; url?: string } | null> {
   const live = await getGooglePlace();
   if (live) return { score: live.rating, count: live.count, url: live.url };
-  const { getHome } = await import('./content');
-  const cms = (await getHome()).testimonials.rating;
-  if (!cms) return null;
-  return { score: parseFloat(cms.score.replace(',', '.')), count: cms.count, url: cms.url };
+  return (await getSettings()).rating ?? null;
 }

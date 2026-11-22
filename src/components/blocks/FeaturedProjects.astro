@@ -1,0 +1,69 @@
+---
+/** Row of featured realizations (Realizacje → "Wyróżniona"; none marked → the first ones) + link to all. */
+import ProjectCard from '@/components/cards/ProjectCard.astro';
+import { getProjects } from '@/lib/content';
+import type { BlockOf } from '@/schemas/blocks';
+
+type Props = BlockOf<'featuredProjects'>;
+const { eyebrow, title, buttonLabel, limit, theme } = Astro.props;
+
+const all = await getProjects();
+const featured = all.filter((p) => p.data.featured);
+const projects = (featured.length ? featured : all).slice(0, limit);
+---
+
+<section class:list={['projects section', `theme-${theme}`]}>
+  <div class="container">
+    <header class="section-head">
+      <div class="section-head__text">
+        {eyebrow && <p class="eyebrow" data-reveal>{eyebrow}</p>}
+        {title && <h2 class="display" data-split>{title}</h2>}
+      </div>
+      <a href="/realizacje" class="btn btn--ghost btn--baseline" data-reveal>{buttonLabel} ({all.length})</a>
+    </header>
+
+    <ul role="list" class="projects__row card-grid" data-reveal-stagger>
+      {
+        projects.map((p, i) => (
+          <li class="projects__item">
+            <ProjectCard project={p} index={i} />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style lang="scss">
+  // One aligned row: all cards share the same top edge and size.
+  // Below lg the row scrolls sideways (snap) instead of stacking.
+  .projects__row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(78vw, 22rem);
+    column-gap: clamp(1rem, 2vw, 1.5rem);
+    row-gap: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    @include up(md) {
+      grid-auto-columns: calc((100% - 1.5rem) / 2.2);
+    }
+
+    @include up(lg) {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      overflow: visible;
+    }
+  }
+
+  .projects__item {
+    scroll-snap-align: start;
+    min-width: 0;
+  }
+</style>

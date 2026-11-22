@@ -1,25 +1,12 @@
 ---
-/**
- * Catalog design page (ready-made house design).
- *
- *  header      crumbs · "Projekt domu" · title (left) · excerpt (right)
- *  specs bar   Powierzchnia | Pokoje | Kondygnacje | Wyróżnik
- *  cover       large visualisation (lightbox)
- *  story       sticky "ask about this design" box (left) + description, "Co możemy zmienić", floor plans (right)
- *  gallery     visualisations (when added in the CMS)
- *  see also    other designs from the catalog
- */
+/** Catalog design page (ready-made house design) — content in src/content/catalog/<slug>.md (CMS → Katalog projektów). */
 import { render } from 'astro:content';
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import PageHero from '@/components/PageHero.astro';
-import Lightbox from '@/components/Lightbox.astro';
-import Icon from '@/components/Icon.astro';
-import DesignCard from '@/components/DesignCard.astro';
-import Facts from '@/components/detail/Facts.astro';
+import DetailLayout from '@/layouts/DetailLayout.astro';
+import DesignCard from '@/components/cards/DesignCard.astro';
 import ZoomImage from '@/components/detail/ZoomImage.astro';
-import Gallery from '@/components/detail/Gallery.astro';
-import AskBox from '@/components/detail/AskBox.astro';
-import { getCatalog } from '@/lib/content';
+import Icon from '@/components/ui/Icon.astro';
+import { getCatalog, getSettings, getTemplates } from '@/lib/content';
+import { templateTitle, withOverrides } from '@/lib/seo';
 
 export async function getStaticPaths() {
   const designs = await getCatalog();
@@ -36,102 +23,82 @@ export async function getStaticPaths() {
 
 const { design, others, total } = Astro.props;
 const { Content } = await render(design);
+const [settings, { catalog: t }] = await Promise.all([getSettings(), getTemplates()]);
 const d = design.data;
-
-// default list from the brand mockup ("przesunąć ściany, dodać pokój, garaż lub taras")
-const modifications = d.modifications.length
-  ? d.modifications
-  : ['Przesunięcie ścian i zmiana układu pomieszczeń', 'Dodatkowy pokój lub antresola', 'Garaż w bryle lub wolnostojący', 'Taras, zadaszenie i większe przeszklenia'];
-const gallery = d.gallery.filter((src) => src !== d.image);
+const modifications = d.modifications.length ? d.modifications : t.modifications;
 ---
 
-<BaseLayout title={`${d.title} — Katalog projektów — BUDUJE GRUPA`} description={d.excerpt} image={d.image} header="solid" prefooter="custom">
-  <PageHero
-    layout="split"
-    eyebrow="Projekt domu"
-    title={d.title}
-    text={d.excerpt}
-    crumbs={[{ label: 'Katalog', href: '/katalog' }, { label: d.title }]}
-  />
+<DetailLayout
+  seo={withOverrides({ title: templateTitle(settings, `${d.title} — Katalog projektów`), description: d.excerpt, image: d.image }, d.seo)}
+  prefooter={t.prefooter}
+  eyebrow={t.eyebrow}
+  title={d.title}
+  excerpt={d.excerpt}
+  crumbs={[{ label: 'Katalog', href: '/katalog' }, { label: d.title }]}
+  facts={[
+    { label: 'Powierzchnia', value: `${d.area} m²` },
+    { label: 'Pokoje', value: d.rooms },
+    { label: 'Kondygnacje', value: d.floors === 'parterowy' ? 'Parterowy' : 'Z poddaszem' },
+    { label: 'Wyróżnik', value: d.feature },
+  ]}
+  cover={{ src: d.image, alt: `Projekt domu ${d.title}` }}
+  ask={{ title: t.askTitle, text: t.askText, label: t.askButton, href: `/kontakt?projekt=${encodeURIComponent(d.title)}` }}
+  gallery={{ images: d.gallery, alt: (i) => `${d.title} — wizualizacja ${i + 2}`, label: 'Wizualizacje' }}
+>
+  {
+    t.standards.length > 0 && (
+      <ul slot="ask" role="list" class="standards">
+        {t.standards.map((s) => (
+          <li>{s}</li>
+        ))}
+      </ul>
+    )
+  }
 
-  <section class="detail theme-light">
-    <div class="container">
-      <Facts
-        facts={[
-          { label: 'Powierzchnia', value: `${d.area} m²` },
-          { label: 'Pokoje', value: d.rooms },
-          { label: 'Kondygnacje', value: d.floors === 'parterowy' ? 'Parterowy' : 'Z poddaszem' },
-          { label: 'Wyróżnik', value: d.feature },
-        ]}
-      />
+  <div class="prose" data-reveal>
+    <Content />
+  </div>
 
-      <ZoomImage src={d.image} alt={`Projekt domu ${d.title}`} variant="cover" eager />
-
-      <div class="detail__story">
-        <div class="detail__aside">
-          <AskBox
-            title="Podoba Ci się ten projekt?"
-            text="Wycenimy go w wybranym standardzie i dopasujemy do Twojej działki."
-            href={`/kontakt?projekt=${encodeURIComponent(d.title)}`}
-            label="Zapytaj o ten projekt"
-          >
-            <ul role="list" class="standards">
-              <li>Stan surowy zamknięty</li>
-              <li>Stan deweloperski</li>
-              <li>Pod klucz</li>
-            </ul>
-          </AskBox>
-        </div>
-
-        <div class="detail__body">
-          <div class="prose" data-reveal>
-            <Content />
-          </div>
-
-          <div class="mods" data-reveal>
-            <h2 class="mods__title">Co możemy zmienić</h2>
-            <ul role="list" class="mods__list">
-              {
-                modifications.map((m) => (
-                  <li>
-                    <Icon name="check" />
-                    {m}
-                  </li>
-                ))
-              }
-            </ul>
-          </div>
-
-          {
-            d.plans.length > 0 && (
-              <div class="plans" data-reveal>
-                <h2 class="mods__title">Rzuty</h2>
-                <ul role="list" class="plans__grid">
-                  {d.plans.map((p, i) => (
-                    <li>
-                      <ZoomImage src={p.image} alt={`${d.title} — ${p.label ?? `rzut ${i + 1}`}`} variant="plan" />
-                      {p.label && <p class="plans__label">{p.label}</p>}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )
-          }
-        </div>
+  {
+    modifications.length > 0 && (
+      <div data-reveal>
+        <h2 class="mods__title">{t.modificationsTitle}</h2>
+        <ul role="list" class="mods__list">
+          {modifications.map((m) => (
+            <li>
+              <Icon name="check" />
+              {m}
+            </li>
+          ))}
+        </ul>
       </div>
+    )
+  }
 
-      <Gallery images={gallery} alt={(i) => `${d.title} — wizualizacja ${i + 2}`} label="Wizualizacje" total={gallery.length + 1} />
-    </div>
-  </section>
+  {
+    d.plans.length > 0 && (
+      <div data-reveal>
+        <h2 class="mods__title">Rzuty</h2>
+        <ul role="list" class="plans__grid">
+          {d.plans.map((p, i) => (
+            <li>
+              <ZoomImage src={p.image} alt={`${d.title} — ${p.label ?? `rzut ${i + 1}`}`} variant="plan" />
+              {p.label && <p class="plans__label">{p.label}</p>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
 
   {
     others.length > 0 && (
-      <section class="more theme-light" aria-labelledby="more-title">
+      <section slot="after" class="more theme-light" aria-labelledby="more-title">
         <div class="container">
-          <header class="more__head">
-            <div>
+          <header class="section-head more__head">
+            <div class="section-head__text">
               <p class="eyebrow">Katalog</p>
-              <h2 class="display more__title" id="more-title">
+              <h2 class="display" id="more-title">
                 Zobacz też
               </h2>
             </div>
@@ -150,47 +117,9 @@ const gallery = d.gallery.filter((src) => src !== d.image);
       </section>
     )
   }
-
-  <Lightbox />
-</BaseLayout>
+</DetailLayout>
 
 <style lang="scss">
-  .detail {
-    padding-bottom: var(--section-y);
-  }
-
-  .detail__story {
-    display: grid;
-    gap: 2.5rem clamp(1rem, 1.6vw, 1.5rem);
-    margin-top: clamp(3rem, 6vw, 5rem);
-
-    @include up(lg) {
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      align-items: start;
-    }
-  }
-
-  .detail__aside {
-    @include up(lg) {
-      grid-column: 1 / span 4;
-      position: sticky;
-      top: calc(var(--header-h) + 2rem);
-    }
-  }
-
-  .detail__body {
-    display: grid;
-    gap: clamp(2.5rem, 5vw, 3.5rem);
-
-    @include up(lg) {
-      grid-column: 6 / -1;
-
-      .prose > :first-child {
-        margin-top: 0;
-      }
-    }
-  }
-
   // the three standards inside the ask box
   .standards {
     display: flex;
@@ -262,19 +191,8 @@ const gallery = d.gallery.filter((src) => src !== d.image);
   }
 
   .more__head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 1.5rem 3rem;
     padding-top: clamp(2.5rem, 5vw, 4rem);
-    margin-bottom: clamp(2rem, 4vw, 3rem);
     border-top: 1px solid var(--line);
-
-    > div {
-      display: grid;
-      gap: 1.25rem;
-    }
   }
 
   .more__grid {

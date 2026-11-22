@@ -1,10 +1,9 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import PageHero from '@/components/PageHero.astro';
+/** "Not found" page — content in src/content/fixed-pages/404.json (CMS → Strony stałe → Strona 404). */
+import BlockPage from '@/layouts/BlockPage.astro';
+import { getPage } from '@/lib/content';
+
+const page = await getPage('404');
 ---
 
-<BaseLayout title="Nie znaleziono strony — Buduje Grupa">
-  <PageHero eyebrow="Błąd 404" title="Tu jeszcze nic nie zbudowaliśmy." text="Strona, której szukasz, nie istnieje lub została przeniesiona.">
-    <div><a href="/" class="btn">Strona główna</a></div>
-  </PageHero>
-</BaseLayout>
+<BlockPage page={page} />

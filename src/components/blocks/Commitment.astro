@@ -11,8 +11,9 @@
  *  ──────────────────── hairline (12 cols) ───────────────────
  *  „Quote …”                                     [ button ]
  */
-import type { BlockOf } from '@/content.config';
-import { pad } from '@/lib/content';
+import type { BlockOf } from '@/schemas/blocks';
+import Img from '@/components/ui/Img.astro';
+import { pad } from '@/lib/format';
 
 type Props = BlockOf<'commitment'>;
 const { image, imageAlt = '', eyebrow, title, items, quote, button, theme } = Astro.props;
@@ -22,7 +23,7 @@ const { image, imageAlt = '', eyebrow, title, items, quote, button, theme } = As
   <div class="container">
     <div class="commitment__grid">
       <figure class="commitment__media" data-clip-reveal>
-        <img src={image} alt={imageAlt} loading="lazy" width="1024" height="1280" />
+        <Img src={image} sizes="(min-width: 1024px) 50vw, 100vw" alt={imageAlt} loading="lazy" width="1024" height="1280" />
       </figure>
 
       <div class="commitment__body">

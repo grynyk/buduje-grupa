@@ -1,33 +1,22 @@
 ---
-/**
- * Realization (case study) page.
- *
- *  header      crumbs · category · title (left) · excerpt (right)
- *  facts bar   Lokalizacja | Rok | Powierzchnia | Czas realizacji | Zakres
- *  cover       large, clean photo (opens the lightbox)
- *  story       sticky "ask about a similar house" box (left) + description (right)
- *  gallery     2-column grid, every photo opens the lightbox
- *  prev/next   neighbouring realizations + "all realizations"
- */
+/** Realization (case study) page — content in src/content/projects/<slug>.md (CMS → Realizacje). */
 import { render } from 'astro:content';
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import PageHero from '@/components/PageHero.astro';
-import Lightbox from '@/components/Lightbox.astro';
-import Icon from '@/components/Icon.astro';
-import Facts from '@/components/detail/Facts.astro';
-import ZoomImage from '@/components/detail/ZoomImage.astro';
-import Gallery from '@/components/detail/Gallery.astro';
-import AskBox from '@/components/detail/AskBox.astro';
-import { getProjects } from '@/lib/content';
+import Img from '@/components/ui/Img.astro';
+import DetailLayout from '@/layouts/DetailLayout.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { getProjects, getSettings, getTemplates, projectPath } from '@/lib/content';
+import { templateTitle, withOverrides } from '@/lib/seo';
 
 export async function getStaticPaths() {
   const projects = await getProjects();
+  const at = (i: number) => projects[(i + projects.length) % projects.length];
   return projects.map((project, i) => ({
     params: { slug: project.id },
     props: {
       project,
-      prev: projects.length > 1 ? projects[(i - 1 + projects.length) % projects.length] : undefined,
-      next: projects.length > 1 ? projects[(i + 1) % projects.length] : undefined,
+      // neighbours for the prev/next links (wrapping around)
+      prev: projects.length > 1 ? at(i - 1) : undefined,
+      next: projects.length > 1 ? at(i + 1) : undefined,
       total: projects.length,
     },
   }));
@@ -35,63 +24,44 @@ export async function getStaticPaths() {
 
 const { project, prev, next, total } = Astro.props;
 const { Content } = await render(project);
+const [settings, { project: t }] = await Promise.all([getSettings(), getTemplates()]);
 const d = project.data;
-const gallery = d.gallery.filter((src) => src !== d.cover);
 ---
 
-<BaseLayout title={`${d.title} — Realizacje — BUDUJE GRUPA`} description={d.excerpt} image={d.cover} header="solid" prefooter="visit">
-  <PageHero
-    layout="split"
-    eyebrow={d.category}
-    title={d.title}
-    text={d.excerpt}
-    crumbs={[{ label: 'Realizacje', href: '/realizacje' }, { label: d.title }]}
-  />
-
-  <section class="detail theme-light">
-    <div class="container">
-      <Facts
-        facts={[
-          { label: 'Lokalizacja', value: d.location },
-          { label: 'Rok', value: d.year },
-          { label: 'Powierzchnia', value: d.area },
-          { label: 'Czas realizacji', value: d.duration },
-          { label: 'Zakres', value: d.scope },
-        ]}
-      />
-
-      <ZoomImage src={d.cover} alt={d.title} variant="cover" eager />
-
-      <div class="detail__story">
-        <div class="detail__aside">
-          <AskBox
-            title="Interesuje Cię podobny dom?"
-            text="Opowiedz nam o swojej działce — przygotujemy wycenę i harmonogram."
-            href={`/kontakt?realizacja=${encodeURIComponent(d.title)}`}
-            label="Zapytaj o podobny dom"
-          />
-        </div>
-        <div class="detail__body prose" data-reveal>
-          <Content />
-        </div>
-      </div>
-
-      <Gallery images={gallery} alt={(i) => `${d.title} — zdjęcie ${i + 2}`} total={gallery.length + 1} />
-    </div>
-  </section>
+<DetailLayout
+  seo={withOverrides({ title: templateTitle(settings, `${d.title} — Realizacje`), description: d.excerpt, image: d.cover }, d.seo)}
+  prefooter={t.prefooter}
+  eyebrow={d.category}
+  title={d.title}
+  excerpt={d.excerpt}
+  crumbs={[{ label: 'Realizacje', href: '/realizacje' }, { label: d.title }]}
+  facts={[
+    { label: 'Lokalizacja', value: d.location },
+    { label: 'Rok', value: d.year },
+    { label: 'Powierzchnia', value: d.area },
+    { label: 'Czas realizacji', value: d.duration },
+    { label: 'Zakres', value: d.scope },
+  ]}
+  cover={{ src: d.cover, alt: d.title }}
+  ask={{ title: t.askTitle, text: t.askText, label: t.askButton, href: `/kontakt?realizacja=${encodeURIComponent(d.title)}` }}
+  gallery={{ images: d.gallery, alt: (i) => `${d.title} — zdjęcie ${i + 2}` }}
+>
+  <div class="prose" data-reveal>
+    <Content />
+  </div>
 
   {
     prev && next && (
-      <nav class="pager theme-light" aria-label="Inne realizacje">
+      <nav slot="after" class="pager theme-light" aria-label="Inne realizacje">
         <div class="container">
           <div class="pager__grid">
             {[
               { p: prev, side: 'prev' as const, label: 'Poprzednia realizacja' },
               { p: next, side: 'next' as const, label: 'Następna realizacja' },
             ].map(({ p, side, label }) => (
-              <a href={`/realizacje/${p.id}`} class:list={['pager__link', `pager__link--${side}`]} rel={side}>
+              <a href={projectPath(p.id)} class:list={['pager__link', `pager__link--${side}`]} rel={side}>
                 <span class="pager__media">
-                  <img src={p.data.cover} alt="" loading="lazy" width="1024" height="1280" />
+                  <Img src={p.data.cover} sizes="(min-width: 768px) 50vw, 100vw" alt="" loading="lazy" width="1024" height="1280" />
                 </span>
                 <span class="pager__text">
                   <span class="pager__dir">
@@ -114,45 +84,9 @@ const gallery = d.gallery.filter((src) => src !== d.cover);
       </nav>
     )
   }
-
-  <Lightbox />
-</BaseLayout>
+</DetailLayout>
 
 <style lang="scss">
-  .detail {
-    padding-bottom: var(--section-y);
-  }
-
-  // 12-col: sticky ask box (cols 1–4) + description (cols 6–12)
-  .detail__story {
-    display: grid;
-    gap: 2.5rem clamp(1rem, 1.6vw, 1.5rem);
-    margin-top: clamp(3rem, 6vw, 5rem);
-
-    @include up(lg) {
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      align-items: start;
-    }
-  }
-
-  .detail__aside {
-    @include up(lg) {
-      grid-column: 1 / span 4;
-      position: sticky;
-      top: calc(var(--header-h) + 2rem);
-    }
-  }
-
-  .detail__body {
-    @include up(lg) {
-      grid-column: 6 / -1;
-
-      > :first-child {
-        margin-top: 0;
-      }
-    }
-  }
-
   /* ---------- prev / next ---------- */
   .pager {
     padding-bottom: var(--section-y);

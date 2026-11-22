@@ -1,0 +1,137 @@
+{
+  "seo": {
+    "title": "Proces budowy — od rozmowy do kluczy | BUDUJE GRUPA",
+    "description": "Sześć kroków od pierwszej konsultacji do przekazania kluczy. Jeden zespół, jedna umowa, jasny harmonogram."
+  },
+  "prefooter": "quote",
+  "blocks": [
+    {
+      "_template": "pageHero",
+      "layout": "split",
+      "eyebrow": "Proces budowy",
+      "title": "Od rozmowy do kluczy w 6 krokach.",
+      "text": "Jeden zespół, jedna umowa i harmonogram, który znasz od pierwszego dnia. Przy każdym etapie wiesz, co robimy my, czego potrzebujemy od Ciebie i co dostajesz na koniec."
+    },
+    {
+      "_template": "timeline",
+      "eyebrow": "6 etapów budowy",
+      "weLabel": "Po naszej stronie",
+      "youLabel": "Po Twojej stronie",
+      "resultLabel": "Efekt",
+      "items": [
+        {
+          "title": "Konsultacja",
+          "duration": "1–2 spotkania",
+          "text": "Poznajemy potrzeby, budżet i działkę.",
+          "we": [
+            "Analiza działki, MPZP lub warunków zabudowy",
+            "Wstępny budżet i dobór standardu",
+            "Odpowiedzi na wszystkie pytania"
+          ],
+          "you": [
+            "Opowiadasz o planach i budżecie",
+            "Przekazujesz numer działki lub mapę"
+          ],
+          "result": "Wstępna wycena i plan dalszych kroków — bez zobowiązań."
+        },
+        {
+          "title": "Projekt",
+          "duration": "4–8 tygodni",
+          "text": "Z katalogu lub indywidualny, z adaptacją.",
+          "we": [
+            "Adaptacja projektu do działki",
+            "Projekt konstrukcyjny szkieletu",
+            "Szczegółowy kosztorys"
+          ],
+          "you": [
+            "Akceptujesz układ pomieszczeń",
+            "Wybierasz standard wykończenia"
+          ],
+          "result": "Projekt budowlany i umowa ze stałą ceną oraz harmonogramem."
+        },
+        {
+          "title": "Formalności",
+          "duration": "zależnie od urzędu",
+          "text": "Pozwolenie na budowę lub zgłoszenie.",
+          "we": [
+            "Komplet dokumentów i wniosek",
+            "Kontakt z urzędem w Twoim imieniu",
+            "Kierownik budowy i dziennik budowy"
+          ],
+          "you": [
+            "Podpisujesz pełnomocnictwo",
+            "Odbierasz decyzję lub potwierdzenie zgłoszenia"
+          ],
+          "result": "Prawomocne pozwolenie lub skuteczne zgłoszenie — możemy budować."
+        },
+        {
+          "title": "Fundamenty",
+          "duration": "2–3 tygodnie",
+          "text": "Przygotowanie terenu i płyta fundamentowa.",
+          "we": [
+            "Wytyczenie budynku przez geodetę",
+            "Płyta fundamentowa z izolacją",
+            "Przygotowanie przyłączy"
+          ],
+          "you": [
+            "Zapewniasz dojazd i prąd budowlany",
+            "Uczestniczysz w odbiorze płyty"
+          ],
+          "result": "Gotowa płyta fundamentowa i protokół odbioru częściowego."
+        },
+        {
+          "title": "Budowa",
+          "duration": "3–5 miesięcy",
+          "text": "Konstrukcja, dach, stolarka, instalacje.",
+          "we": [
+            "Szkielet ścian i stropów, dach",
+            "Okna, drzwi i elewacja",
+            "Instalacje i raport po każdym etapie"
+          ],
+          "you": [
+            "Wybierasz materiały wykończeniowe",
+            "Odbierasz kolejne etapy razem z nami"
+          ],
+          "result": "Dom w wybranym standardzie — surowym, deweloperskim lub pod klucz."
+        },
+        {
+          "title": "Odbiór",
+          "duration": "1–2 tygodnie",
+          "text": "Wykończenie i przekazanie kluczy.",
+          "we": [
+            "Odbiory techniczne i pomiary",
+            "Dokumentacja powykonawcza",
+            "Karta gwarancyjna"
+          ],
+          "you": [
+            "Sprawdzasz dom podczas odbioru końcowego",
+            "Zgłaszasz ewentualne uwagi"
+          ],
+          "result": "Klucze, komplet dokumentów i gwarancja na wykonane prace."
+        }
+      ]
+    },
+    {
+      "_template": "commitment",
+      "image": "/images/budowa-szkielet.jpg",
+      "imageAlt": "Dom w konstrukcji szkieletowej w trakcie budowy",
+      "eyebrow": "W trakcie budowy",
+      "title": "Wiesz, co dzieje się na Twojej działce.",
+      "items": [
+        {
+          "title": "Raport po każdym etapie",
+          "text": "Zdjęcia i krótkie podsumowanie prac — nawet jeśli mieszkasz daleko od budowy."
+        },
+        {
+          "title": "Odbiory częściowe razem z Tobą",
+          "text": "Każdy etap odbieramy wspólnie, zanim przejdziemy dalej."
+        },
+        {
+          "title": "Płatność po odbiorze etapu",
+          "text": "Transze zgodne z harmonogramem w umowie — płacisz za to, co już stoi."
+        }
+      ],
+      "theme": "light"
+    }
+  ]
+}

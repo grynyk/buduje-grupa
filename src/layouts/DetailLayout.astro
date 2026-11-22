@@ -1,0 +1,105 @@
+---
+/**
+ * Shared frame of the generated detail pages (/realizacje/…, /katalog/…):
+ *
+ *  header      crumbs · eyebrow · title (left) · excerpt (right)
+ *  facts bar   label / value pairs
+ *  cover       large photo (opens the lightbox)
+ *  story       sticky "ask about it" box (left) + description (right, default slot)
+ *  gallery     2-column grid, every photo opens the lightbox
+ *  after       slot "after" — prev/next links, "see also" …
+ */
+import BaseLayout from './BaseLayout.astro';
+import PageHero from '@/components/blocks/PageHero.astro';
+import AskBox from '@/components/detail/AskBox.astro';
+import Facts from '@/components/detail/Facts.astro';
+import Gallery from '@/components/detail/Gallery.astro';
+import Lightbox from '@/components/detail/Lightbox.astro';
+import ZoomImage from '@/components/detail/ZoomImage.astro';
+import type { Crumb, PageSeo } from '@/lib/seo';
+import type { PrefooterVariant } from '@/schemas/common';
+
+interface Props {
+  seo: PageSeo;
+  prefooter: PrefooterVariant;
+  eyebrow: string;
+  title: string;
+  excerpt?: string;
+  crumbs: Crumb[];
+  facts: { label: string; value?: string | number | null }[];
+  cover: { src: string; alt: string };
+  ask: { title: string; text?: string; href: string; label: string };
+  gallery: { images: string[]; alt: (i: number) => string; label?: string };
+}
+const { seo, prefooter, eyebrow, title, excerpt, crumbs, facts, cover, ask, gallery } = Astro.props;
+// the cover is shown above — don't repeat it in the gallery
+const photos = gallery.images.filter((src) => src !== cover.src);
+---
+
+<BaseLayout seo={{ ...seo, image: seo.image ?? cover.src }} header="solid" prefooter={prefooter} crumbs={crumbs}>
+  <PageHero layout="split" eyebrow={eyebrow} title={title} text={excerpt} crumbs={crumbs} />
+
+  <section class="detail theme-light">
+    <div class="container">
+      <Facts facts={facts} />
+
+      <ZoomImage src={cover.src} alt={cover.alt} variant="cover" eager />
+
+      <div class="detail__story">
+        <div class="detail__aside">
+          <AskBox {...ask}>
+            <slot name="ask" />
+          </AskBox>
+        </div>
+        <div class="detail__body">
+          <slot />
+        </div>
+      </div>
+
+      <Gallery images={photos} alt={gallery.alt} label={gallery.label} total={photos.length + 1} />
+    </div>
+  </section>
+
+  <slot name="after" />
+
+  <Lightbox />
+</BaseLayout>
+
+<style lang="scss">
+  .detail {
+    padding-bottom: var(--section-y);
+  }
+
+  // 12-col: sticky ask box (cols 1–4) + description (cols 6–12)
+  .detail__story {
+    display: grid;
+    gap: 2.5rem clamp(1rem, 1.6vw, 1.5rem);
+    margin-top: clamp(3rem, 6vw, 5rem);
+
+    @include up(lg) {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: start;
+    }
+  }
+
+  .detail__aside {
+    @include up(lg) {
+      grid-column: 1 / span 4;
+      position: sticky;
+      top: calc(var(--header-h) + 2rem);
+    }
+  }
+
+  .detail__body {
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 3.5rem);
+
+    @include up(lg) {
+      grid-column: 6 / -1;
+
+      :global(.prose > :first-child) {
+        margin-top: 0;
+      }
+    }
+  }
+</style>

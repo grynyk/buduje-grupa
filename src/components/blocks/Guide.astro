@@ -4,39 +4,27 @@
  *  hero    — opens the page: label "Bezpłatny poradnik PDF", h1, intro, topics (left) · form card (right)
  *  closing — green band at the end of the page: title + text (left) · form (right)
  */
-import type { BlockOf } from '@/content.config';
-import Icon from '@/components/Icon.astro';
-import GuideForm from '@/components/GuideForm.astro';
-import GoogleRating from '@/components/GoogleRating.astro';
+import type { BlockOf } from '@/schemas/blocks';
+import Img from '@/components/ui/Img.astro';
+import Icon from '@/components/ui/Icon.astro';
+import GuideForm from '@/components/forms/GuideForm.astro';
+import GoogleRating from '@/components/ui/GoogleRating.astro';
+import Title from '@/components/ui/Title.astro';
+import { fadeIn } from '@/lib/motion';
 
 type Props = BlockOf<'guide'>;
 const { variant, eyebrow, title, text, topics, formTitle, buttonLabel, note, pdf, showRating, image } = Astro.props;
 const hero = variant === 'hero';
-const formId = hero ? 'poradnik' : 'poradnik-2';
+const formId = hero ? 'guide-form' : 'guide-form-2';
+const reveal = fadeIn(hero);
 ---
 
-<section
-  class:list={['guide', hero ? 'guide--hero theme-light' : 'guide--closing theme-dark']}
-  id={hero ? 'poradnik' : undefined}
-  data-hero={hero ? '' : undefined}
->
+<section class:list={['guide', hero ? 'guide--hero theme-light' : 'guide--closing theme-dark']} data-hero={hero ? '' : undefined}>
   <div class="container guide__grid">
     <div class="guide__intro">
-      {eyebrow && <p class="eyebrow" data-hero-fade={hero ? '' : undefined} data-reveal={hero ? undefined : ''}>{eyebrow}</p>}
-      {
-        hero ? (
-          <h1 class="guide__title">
-            <span class="guide__line">
-              <span data-hero-line>{title}</span>
-            </span>
-          </h1>
-        ) : (
-          <h2 class="guide__title" data-split>
-            {title}
-          </h2>
-        )
-      }
-      {text && <p class="guide__text" data-hero-fade={hero ? '' : undefined} data-reveal={hero ? undefined : ''}>{text}</p>}
+      {eyebrow && <p class="eyebrow" {...reveal}>{eyebrow}</p>}
+      <Title as={hero ? 'h1' : 'h2'} text={title} class="guide__title" />
+      {text && <p class="guide__text" {...reveal}>{text}</p>}
       {
         topics.length > 0 && (
           <ul role="list" class="guide__topics" data-reveal-stagger>
@@ -59,7 +47,7 @@ const formId = hero ? 'poradnik' : 'poradnik-2';
     </div>
 
     <div class="guide__card" data-reveal>
-      {hero && image && <img class="guide__cover" src={image} alt="" width="1536" height="864" />}
+      {hero && image && <Img class="guide__cover" src={image} sizes="(min-width: 1024px) 50vw, 100vw" alt="" width="1536" height="864" />}
       {formTitle && <p class="guide__form-title">{formTitle}</p>}
       <GuideForm id={formId} buttonLabel={buttonLabel} note={note} pdf={pdf} />
     </div>
@@ -68,7 +56,7 @@ const formId = hero ? 'poradnik' : 'poradnik-2';
 
 <style lang="scss">
   .guide--hero {
-    padding-top: calc(var(--header-h) + clamp(3.5rem, 7vw, 6rem));
+    padding-top: var(--page-top);
     padding-bottom: var(--section-y);
   }
 
@@ -96,25 +84,14 @@ const formId = hero ? 'poradnik' : 'poradnik-2';
     }
   }
 
-  .guide__title {
+  .guide :global(.guide__title) {
     @include display(var(--fs-h1));
     line-height: 1.05;
     max-width: 16ch;
   }
 
-  .guide--closing .guide__title {
+  .guide--closing :global(.guide__title) {
     @include display(var(--fs-h2));
-  }
-
-  .guide__line {
-    display: block;
-    overflow: hidden;
-    padding-block: 0.08em;
-    margin-block: -0.08em;
-
-    > span {
-      display: block;
-    }
   }
 
   .guide__text {

@@ -1,6 +1,7 @@
 ---
-import type { BlockOf } from '@/content.config';
-import Logo from '@/components/Logo.astro';
+import type { BlockOf } from '@/schemas/blocks';
+import Img from '@/components/ui/Img.astro';
+import Logo from '@/components/ui/Logo.astro';
 
 type Props = BlockOf<'mediaText'>;
 const { image, imageAlt = '', eyebrow, title, text, items, note, button, reverse, theme } = Astro.props;
@@ -9,7 +10,7 @@ const { image, imageAlt = '', eyebrow, title, text, items, note, button, reverse
 <section class:list={['media-text', `theme-${theme}`, { 'media-text--reverse': reverse, 'media-text--bleed': theme === 'paper' }]}>
   <div class="media-text__inner">
     <figure class="media-text__media" data-clip-reveal>
-      <img src={image} alt={imageAlt} loading="lazy" width="1024" height="1280" />
+      <Img src={image} sizes="(min-width: 1024px) 50vw, 100vw" alt={imageAlt} loading="lazy" width="1024" height="1280" />
     </figure>
 
     <div class="media-text__body">

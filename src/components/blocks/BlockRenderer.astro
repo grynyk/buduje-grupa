@@ -1,56 +1,95 @@
 ---
-import type { Block } from '@/content.config';
+/**
+ * Renders a page's blocks in order. A block with an `anchor` is wrapped in <div id="…"> so links
+ * like `#kontakt` can jump to it.
+ */
+import type { Block, BlockName } from '@/schemas/blocks';
+import About from './About.astro';
+import Articles from './Articles.astro';
+import Banner from './Banner.astro';
+import Catalog from './Catalog.astro';
+import Commitment from './Commitment.astro';
+import Contact from './Contact.astro';
+import Cta from './Cta.astro';
+import Estimate from './Estimate.astro';
+import Faq from './Faq.astro';
+import FeaturedProjects from './FeaturedProjects.astro';
 import Features from './Features.astro';
-import People from './People.astro';
-import Quote from './Quote.astro';
+import Guide from './Guide.astro';
+import Hero from './Hero.astro';
+import Instagram from './Instagram.astro';
+import Layers from './Layers.astro';
+import MapBand from './MapBand.astro';
+import Marquee from './Marquee.astro';
 import MediaText from './MediaText.astro';
 import Packages from './Packages.astro';
-import Steps from './Steps.astro';
-import Timeline from './Timeline.astro';
-import Commitment from './Commitment.astro';
-import Guide from './Guide.astro';
-import Stats from './Stats.astro';
-import Layers from './Layers.astro';
-import Faq from './Faq.astro';
-import Articles from './Articles.astro';
+import PageHero from './PageHero.astro';
+import People from './People.astro';
+import Process from './Process.astro';
+import ProjectList from './ProjectList.astro';
+import Quote from './Quote.astro';
 import Schedule from './Schedule.astro';
-import Estimate from './Estimate.astro';
-import Cta from './Cta.astro';
-import Catalog from './Catalog.astro';
-import Contact from './Contact.astro';
-import MapBand from './MapBand.astro';
+import Stats from './Stats.astro';
+import Steps from './Steps.astro';
+import Testimonials from './Testimonials.astro';
+import Timeline from './Timeline.astro';
 
 interface Props {
   blocks: Block[];
 }
 const { blocks } = Astro.props;
 
-const components = {
+const components: Record<BlockName, (props: any) => any> = {
+  hero: Hero,
+  pageHero: PageHero,
+  marquee: Marquee,
+  about: About,
+  featuredProjects: FeaturedProjects,
+  projectList: ProjectList,
+  process: Process,
+  instagram: Instagram,
+  banner: Banner,
+  testimonials: Testimonials,
+  contact: Contact,
   features: Features,
   people: People,
   quote: Quote,
   mediaText: MediaText,
   packages: Packages,
   steps: Steps,
-  timeline: Timeline,
   commitment: Commitment,
-  guide: Guide,
+  timeline: Timeline,
   stats: Stats,
   layers: Layers,
+  guide: Guide,
   faq: Faq,
   articles: Articles,
   schedule: Schedule,
   estimate: Estimate,
   cta: Cta,
   catalog: Catalog,
-  contact: Contact,
   map: MapBand,
-} as const;
+};
+
+const ids = blocks.map((b) => b.anchor);
+
+// Hero "scroll down" arrow → the first anchored section below it (else the very next block, given an id).
+const scrollTargets = blocks.map((b, i) => {
+  if (b._template !== 'hero' || i === blocks.length - 1) return undefined;
+  return blocks.slice(i + 1).find((next) => next.anchor)?.anchor ?? (ids[i + 1] = 'tresc');
+});
 ---
 
 {
-  blocks.map((block) => {
-    const Component = components[block._template] as (props: Block) => any;
-    return <Component {...block} />;
+  blocks.map((block, i) => {
+    const Component = components[block._template];
+    const extra = block._template === 'hero' ? { scrollTo: scrollTargets[i] } : {};
+    return ids[i] ? (
+      <div id={ids[i]}>
+        <Component {...block} {...extra} />
+      </div>
+    ) : (
+      <Component {...block} {...extra} />
+    );
   })
 }

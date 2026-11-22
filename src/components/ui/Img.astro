@@ -1,0 +1,21 @@
+---
+/**
+ * <img> for a content photo (`/images/…`): resized WebP variants + srcset via Astro's image pipeline.
+ * Extra attributes (class, loading, data-*, the parent's style scope) are passed through, so parent
+ * styles like `.card img { … }` keep working. `width`/`height` are only a fallback for non-/images paths.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import { responsive } from '@/lib/images';
+
+type Props = Omit<HTMLAttributes<'img'>, 'src'> & {
+  src: string;
+  alt: string;
+  /** how wide the image is displayed, e.g. "(min-width: 1024px) 50vw, 100vw" */
+  sizes?: string;
+};
+
+const { src, sizes, ...attrs } = Astro.props;
+const attributes = { decoding: 'async' as const, ...attrs, ...(await responsive(src, sizes)) };
+---
+
+<img {...attributes} />

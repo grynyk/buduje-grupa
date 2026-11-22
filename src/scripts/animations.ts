@@ -1,6 +1,7 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
+import { formatNumber } from '@/lib/format';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -18,6 +19,7 @@ const EASE = 'expo.out';
 /* -------------------------------------------------------------------------- */
 /*  Hero intro                                                                 */
 /* -------------------------------------------------------------------------- */
+/** Intro of the block that opens the page (the first [data-hero]). */
 function hero() {
   const root = document.querySelector<HTMLElement>('[data-hero]');
   if (!root) return;
@@ -150,15 +152,15 @@ function counters() {
   $$('[data-counter]').forEach((el) => {
     const target = parseFloat(el.dataset.counter || '0');
     const decimals = parseInt(el.dataset.decimals || '0', 10);
-    const fmt = new Intl.NumberFormat('pl-PL', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    const fmt = (v: number) => formatNumber(v, decimals);
     const state = { v: 0 };
-    el.textContent = fmt.format(0);
+    el.textContent = fmt(0);
     gsap.to(state, {
       v: target,
       duration: 2,
       ease: 'power3.out',
       scrollTrigger: { trigger: el, start: 'top 90%', once: true },
-      onUpdate: () => (el.textContent = fmt.format(decimals ? state.v : Math.round(state.v))),
+      onUpdate: () => (el.textContent = fmt(decimals ? state.v : Math.round(state.v))),
     });
   });
 }
@@ -180,9 +182,7 @@ function marquee() {
       end: 'bottom top',
       onUpdate(self) {
         const v = self.getVelocity();
-        if (self.direction !== direction) {
-          direction = self.direction;
-        }
+        direction = self.direction;
         const boost = gsap.utils.clamp(1, 5, Math.abs(v) / 300);
         gsap.to(loop, { timeScale: direction * boost, duration: 0.2, overwrite: true });
         gsap.to(loop, { timeScale: direction, duration: 1.2, delay: 0.2, ease: 'power2.out' });
@@ -196,37 +196,36 @@ function marquee() {
 /*  Process — progress rail + active step                                      */
 /* -------------------------------------------------------------------------- */
 function processTimeline() {
-  const root = document.querySelector<HTMLElement>('[data-process]');
-  if (!root) return;
-  const line = root.querySelector('[data-process-line]');
-  const steps = $$('[data-step]', root);
+  $$('[data-process]').forEach((root) => {
+    const line = root.querySelector('[data-process-line]');
 
-  if (line) {
-    gsap.to(line, {
-      scaleY: 1,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: root.querySelector('.process__steps'),
+    if (line) {
+      gsap.to(line, {
+        scaleY: 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: root.querySelector('.process__steps'),
+          start: 'top 65%',
+          end: 'bottom 65%',
+          scrub: true,
+        },
+      });
+    }
+
+    $$('[data-step]', root).forEach((step) => {
+      ScrollTrigger.create({
+        trigger: step,
         start: 'top 65%',
-        end: 'bottom 65%',
-        scrub: true,
-      },
-    });
-  }
-
-  steps.forEach((step) => {
-    ScrollTrigger.create({
-      trigger: step,
-      start: 'top 65%',
-      onEnter: () => step.classList.add('is-active'),
-      onLeaveBack: () => step.classList.remove('is-active'),
-    });
-    gsap.from(step.querySelector('.step__body'), {
-      autoAlpha: 0,
-      x: 40,
-      duration: 1,
-      ease: EASE,
-      scrollTrigger: { trigger: step, start: 'top 85%', once: true },
+        onEnter: () => step.classList.add('is-active'),
+        onLeaveBack: () => step.classList.remove('is-active'),
+      });
+      gsap.from(step.querySelector('.step__body'), {
+        autoAlpha: 0,
+        x: 40,
+        duration: 1,
+        ease: EASE,
+        scrollTrigger: { trigger: step, start: 'top 85%', once: true },
+      });
     });
   });
 }

@@ -9,9 +9,9 @@
  *  │ …  (rail fills)   │ ├───────────────────────────────────┤
  *  └───────────────────┘ │ 02 …                              │
  */
-import type { BlockOf } from '@/content.config';
-import Icon from '@/components/Icon.astro';
-import { pad } from '@/lib/content';
+import type { BlockOf } from '@/schemas/blocks';
+import Icon from '@/components/ui/Icon.astro';
+import { pad } from '@/lib/format';
 
 type Props = BlockOf<'timeline'>;
 const { eyebrow, items, weLabel, youLabel, resultLabel } = Astro.props;

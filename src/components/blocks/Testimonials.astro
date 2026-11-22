@@ -1,0 +1,407 @@
+---
+/**
+ * Reviews: rating summary (score, stars, count, link to Google) + quote carousel.
+ * Live Google reviews replace the CMS quotes when the Places API key is set (lib/google.ts).
+ */
+import star from '@/assets/icons/star.svg?raw';
+import Icon from '@/components/ui/Icon.astro';
+import { formatRating, getGooglePlace, getRating } from '@/lib/google';
+import { pad, plural } from '@/lib/format';
+import { decorative } from '@/lib/svg';
+import type { BlockOf } from '@/schemas/blocks';
+
+type Props = BlockOf<'testimonials'>;
+const data = Astro.props;
+const [google, liveOrCms] = await Promise.all([getGooglePlace(), getRating()]);
+const rating = data.showRating ? liveOrCms : null;
+
+type Slide = { quote: string; author: string; meta?: string; authorUrl?: string; rating?: number; fromGoogle?: boolean };
+const slides: Slide[] = google?.reviews.length
+  ? google.reviews.map((r) => ({ quote: r.text, author: r.author, meta: r.relativeTime, authorUrl: r.authorUrl, rating: r.rating, fromGoogle: true }))
+  : data.items.map((t) => ({ quote: t.quote, author: t.author, meta: t.role }));
+const count = slides.length;
+const five = Array.from({ length: 5 }, () => decorative(star));
+---
+
+<section class="testimonials theme-light" aria-roledescription={count > 1 ? 'karuzela' : undefined} data-testimonials>
+  <div class="container">
+    <!-- one compact row: heading left, rating + Google link right -->
+    <div class="testimonials__top">
+    <div class="testimonials__head">
+      {data.eyebrow && <p class="eyebrow" data-reveal>{data.eyebrow}</p>}
+      <h2 class:list={[rating ? 'testimonials__title' : 'sr-only']} data-reveal>{data.title}</h2>
+    </div>
+
+    {
+      rating && (
+        <div class="rating" data-reveal>
+          <p class="rating__score">
+            <span class="sr-only">Ocena </span>
+            {formatRating(rating.score)}
+            <span class="sr-only"> na 5</span>
+          </p>
+          <div class="rating__meta">
+            <!-- empty stars + filled stars clipped to the score (e.g. 4,6 → 92%) -->
+            <span class="rating__stars" aria-hidden="true" style={`--fill: ${Math.min(100, (rating.score / 5) * 100)}%`}>
+              <span class="rating__stars-base">{five.map((s) => <span set:html={s} />)}</span>
+              <span class="rating__stars-fill">{five.map((s) => <span set:html={s} />)}</span>
+            </span>
+            <p class="rating__count">
+              {rating.count} {plural(rating.count, ['opinia', 'opinie', 'opinii'])} w Google
+            </p>
+          </div>
+          {rating.url && (
+            <a href={rating.url} class="btn btn--ghost rating__btn" target="_blank" rel="noopener noreferrer">
+              Zobacz opinie w Google
+            </a>
+          )}
+        </div>
+      )
+    }
+    </div>
+
+    {count > 0 && (
+    <div class="testimonials__stage" data-reveal>
+      <Icon name="quote" class="testimonials__mark" />
+
+      <div class="testimonials__slides" aria-live="polite">
+        {
+          slides.map((t, i) => (
+            <figure
+              class:list={['quote', { 'is-active': i === 0 }]}
+              data-slide
+              aria-roledescription="slajd"
+              aria-label={`${i + 1} z ${count}`}
+              aria-hidden={i === 0 ? undefined : 'true'}
+            >
+              <blockquote class="quote__text">
+                <p>{t.quote}</p>
+              </blockquote>
+              <figcaption class="quote__author">
+                {t.authorUrl ? (
+                  <a href={t.authorUrl} target="_blank" rel="noopener noreferrer">
+                    <strong>{t.author}</strong>
+                  </a>
+                ) : (
+                  <strong>{t.author}</strong>
+                )}
+                {typeof t.rating === 'number' && (
+                  <span class="quote__stars" aria-label={`${t.rating} na 5`}>
+                    {'★'.repeat(Math.round(t.rating))}
+                  </span>
+                )}
+                {t.meta && <span>{t.meta}</span>}
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+
+      {slides[0]?.fromGoogle && <p class="testimonials__source">Opinie pochodzą z Google Maps</p>}
+
+      {
+        count > 1 && (
+          <div class="testimonials__controls">
+            <div class="testimonials__counter" aria-hidden="true">
+              <span data-current>01</span> / {pad(count)}
+            </div>
+            <div class="testimonials__bar" aria-hidden="true">
+              <span data-progress />
+            </div>
+            <div class="testimonials__buttons">
+              <button type="button" class="testimonials__btn" data-prev aria-label="Poprzednia opinia">
+                <Icon name="arrow-left" />
+              </button>
+              <button type="button" class="testimonials__btn" data-next aria-label="Następna opinia">
+                <Icon name="arrow-right" />
+              </button>
+            </div>
+          </div>
+        )
+      }
+    </div>
+    )}
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+
+  document.querySelectorAll<HTMLElement>('[data-testimonials]').forEach((root) => {
+    const slides = [...root.querySelectorAll<HTMLElement>('[data-slide]')];
+    if (slides.length < 2) return;
+
+    const current = root.querySelector<HTMLElement>('[data-current]')!;
+    const progress = root.querySelector<HTMLElement>('[data-progress]')!;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const DURATION = 7;
+    let index = 0;
+    let busy = false;
+
+    const timer = gsap.fromTo(
+      progress,
+      { scaleX: 0 },
+      { scaleX: 1, duration: DURATION, ease: 'none', paused: true, onComplete: () => go(index + 1) },
+    );
+
+    function go(next: number) {
+      if (busy) return;
+      next = (next + slides.length) % slides.length;
+      if (next === index) return;
+      busy = true;
+      const from = slides[index];
+      const to = slides[next];
+      from.setAttribute('aria-hidden', 'true');
+      to.removeAttribute('aria-hidden');
+      current.textContent = String(next + 1).padStart(2, '0');
+
+      const finish = () => {
+        from.classList.remove('is-active');
+        to.classList.add('is-active');
+        index = next;
+        busy = false;
+        if (!reduced) timer.restart();
+      };
+
+      if (reduced) return finish();
+      gsap
+        .timeline({ onComplete: finish })
+        .to(from, { autoAlpha: 0, y: -24, duration: 0.45, ease: 'power2.in' })
+        .fromTo(to, { autoAlpha: 0, y: 32 }, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'expo.out' }, '>-0.05');
+    }
+
+    root.querySelector('[data-next]')?.addEventListener('click', () => go(index + 1));
+    root.querySelector('[data-prev]')?.addEventListener('click', () => go(index - 1));
+
+    if (!reduced) {
+      // Autoplay only while visible; pause on hover/focus.
+      const io = new IntersectionObserver(([e]) => (e.isIntersecting ? timer.play() : timer.pause()));
+      io.observe(root);
+      const stage = root.querySelector('.testimonials__stage')!;
+      stage.addEventListener('mouseenter', () => timer.pause());
+      stage.addEventListener('mouseleave', () => timer.play());
+      stage.addEventListener('focusin', () => timer.pause());
+      stage.addEventListener('focusout', () => timer.play());
+    }
+  });
+</script>
+
+<style lang="scss">
+  // compact white section: tighter than the standard section rhythm
+  .testimonials {
+    padding-block: clamp(3.5rem, 6vw, 5.5rem);
+  }
+
+  .testimonials__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem 3rem;
+    padding-bottom: clamp(1.25rem, 2.5vw, 1.75rem);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .testimonials__head {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .testimonials__title {
+    @include display(var(--fs-h2));
+  }
+
+  /* ---------- public rating (Google) ---------- */
+  .rating {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+  }
+
+  .rating__score {
+    @include display(clamp(2.75rem, 2rem + 2.5vw, 4rem));
+    font-weight: 200;
+    line-height: 0.9;
+  }
+
+  .rating__meta {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  // Two identical star rows stacked; the top (filled) one is clipped to the score.
+  .rating__stars {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+
+    :global(svg) {
+      width: 1.375rem;
+      height: 1.375rem;
+    }
+  }
+
+  .rating__stars-base,
+  .rating__stars-fill {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .rating__stars-base {
+    color: rgb(6 52 36 / 0.15);
+  }
+
+  .rating__stars-fill {
+    position: absolute;
+    inset: 0;
+    color: var(--c-wood-2);
+    clip-path: inset(0 calc(100% - var(--fill, 100%)) 0 0);
+  }
+
+  .quote__author .quote__stars {
+    color: var(--c-wood-2);
+    letter-spacing: 0.1em;
+  }
+
+  .quote__author a {
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.2em;
+    transition: text-decoration-color 0.3s;
+
+    @include hover {
+      text-decoration-color: currentColor;
+    }
+  }
+
+  .testimonials__source {
+    margin-top: 1.25rem;
+    @include label;
+    color: var(--muted);
+  }
+
+  .rating__count {
+    @include label;
+    color: var(--muted);
+  }
+
+  .rating__btn {
+    margin-left: 0.5rem;
+
+    @include down(sm) {
+      margin-left: 0;
+    }
+  }
+
+  .testimonials__stage {
+    position: relative;
+    max-width: 56rem;
+    margin-top: clamp(1.75rem, 3vw, 2.5rem);
+  }
+
+  :global(.testimonials__mark) {
+    width: 2rem !important;
+    height: 2rem !important;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .testimonials__slides {
+    display: grid;
+  }
+
+  .quote {
+    grid-area: 1 / 1;
+    visibility: hidden;
+    opacity: 0;
+
+    &.is-active {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+
+  .quote__text {
+    @include display(clamp(1.25rem, 1rem + 1vw, 1.875rem));
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+
+  .quote__author {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+    margin-top: 1.25rem;
+
+    strong {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    span {
+      @include label;
+      color: var(--muted);
+    }
+  }
+
+  .testimonials__controls {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: clamp(1.5rem, 3vw, 2rem);
+  }
+
+  .testimonials__counter {
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-small);
+    color: var(--muted);
+
+    span {
+      color: var(--fg);
+    }
+  }
+
+  .testimonials__bar {
+    flex: 1;
+    height: 2px;
+    background: var(--line);
+
+    span {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+      transform-origin: left;
+      transform: scaleX(0);
+    }
+  }
+
+  .testimonials__buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .testimonials__btn {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    transition:
+      background 0.3s,
+      border-color 0.3s,
+      color 0.3s;
+
+    :global(.icon) {
+      width: 1.125rem;
+    }
+
+    @include hover {
+      background: var(--c-green);
+      border-color: var(--c-green);
+      color: var(--c-white);
+    }
+  }
+</style>

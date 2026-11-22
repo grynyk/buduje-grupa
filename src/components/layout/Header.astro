@@ -1,0 +1,360 @@
+---
+/** Fixed site header: logo, main menu, phone + CTA (desktop) and the full-screen mobile menu. */
+import Logo from '@/components/ui/Logo.astro';
+import { getLayout, type Settings } from '@/lib/content';
+import { isCurrent, telHref } from '@/lib/format';
+
+interface Props {
+  settings: Settings;
+  /** overlay: transparent over a photo/green hero; solid: white bar */
+  variant?: 'overlay' | 'solid';
+}
+const { settings, variant = 'overlay' } = Astro.props;
+const { nav, cta } = await getLayout();
+const menu = nav.filter((item) => item.header);
+const path = Astro.url.pathname;
+---
+
+<header class:list={['header theme-dark', { 'is-solid': variant === 'solid' }]} data-header>
+  <div class="header__bar container">
+    <a href="/" class="header__logo" aria-label={`${settings.companyName} — strona główna`}>
+      <Logo variant="mark" />
+    </a>
+
+    <nav class="header__nav" aria-label="Główna nawigacja">
+      <ul role="list">
+        {
+          menu.map((item) => (
+            <li>
+              <a href={item.href} class="header__link" aria-current={isCurrent(path, item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      {settings.phone && <a href={telHref(settings.phone)} class="header__phone">{settings.phone}</a>}
+      <a href={cta.href} class="btn header__cta">{cta.label}</a>
+    </div>
+
+    <button class="header__burger" type="button" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
+      <span class="sr-only">Menu</span>
+      <span class="header__burger-lines" aria-hidden="true"><span></span><span></span></span>
+    </button>
+  </div>
+
+  <div class="menu" id="mobile-menu" data-menu hidden>
+    <nav class="menu__nav container" aria-label="Menu mobilne">
+      <ul role="list">
+        {
+          menu.map((item) => (
+            <li class="menu__item">
+              <a href={item.href} class="menu__link" data-menu-link aria-current={isCurrent(path, item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="menu__footer" data-menu-footer>
+        <a href={cta.href} class="btn btn--block" data-menu-link>{cta.label}</a>
+        {
+          settings.phone && (
+            <a href={telHref(settings.phone)} class="btn btn--ghost btn--block menu__call">
+              Zadzwoń: {settings.phone}
+            </a>
+          )
+        }
+      </div>
+    </nav>
+  </div>
+</header>
+
+<script>
+  import { gsap } from 'gsap';
+
+  const header = document.querySelector<HTMLElement>('[data-header]')!;
+  const toggle = header.querySelector<HTMLButtonElement>('[data-menu-toggle]')!;
+  const menu = header.querySelector<HTMLElement>('[data-menu]')!;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* --- scrolled / hide-on-scroll state --- */
+  let lastY = window.scrollY;
+  const onScroll = () => {
+    const y = window.scrollY;
+    header.classList.toggle('is-scrolled', y > 24);
+    const goingDown = y > lastY && y > 320;
+    if (!header.classList.contains('is-open')) header.classList.toggle('is-hidden', goingDown);
+    lastY = y;
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* --- mobile menu --- */
+  const items = menu.querySelectorAll('.menu__item, [data-menu-footer]');
+
+  const open = () => {
+    menu.hidden = false;
+    header.classList.add('is-open');
+    toggle.setAttribute('aria-expanded', 'true');
+    document.documentElement.style.overflow = 'hidden';
+    if (!reduced) {
+      gsap.fromTo(menu, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 0.6, ease: 'expo.out' });
+      gsap.fromTo(items, { yPercent: 60, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.7, stagger: 0.04, delay: 0.1, ease: 'expo.out' });
+    }
+  };
+
+  const close = () => {
+    toggle.setAttribute('aria-expanded', 'false');
+    header.classList.remove('is-open');
+    document.documentElement.style.overflow = '';
+    const done = () => (menu.hidden = true);
+    if (reduced) return done();
+    gsap.to(menu, { clipPath: 'inset(0 0 100% 0)', duration: 0.45, ease: 'expo.inOut', onComplete: done });
+  };
+
+  toggle.addEventListener('click', () => (header.classList.contains('is-open') ? close() : open()));
+  menu.querySelectorAll('[data-menu-link]').forEach((a) => a.addEventListener('click', close));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && header.classList.contains('is-open')) {
+      close();
+      toggle.focus();
+    }
+  });
+  window.matchMedia('(min-width: 1280px)').addEventListener('change', (e) => {
+    if (e.matches && header.classList.contains('is-open')) close();
+  });
+</script>
+
+<style lang="scss">
+  .header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 100;
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    transition:
+      transform 0.5s var(--ease-out),
+      background-color 0.4s,
+      border-color 0.4s,
+      color 0.4s;
+
+    // White bar with green ink (brand mockups) — from the start on light pages, after scrolling elsewhere.
+    &.is-solid:not(.is-open),
+    &.is-scrolled:not(.is-open) {
+      --fg: var(--c-green);
+      --muted: rgb(6 52 36 / 0.72);
+      --line: rgb(6 52 36 / 0.12);
+      --action: var(--c-green);
+      --action-fg: var(--c-white);
+      --action-sweep: var(--c-green-2);
+      --action-sweep-fg: var(--c-white);
+      color: var(--fg);
+      background: rgb(255 255 255 / 0.96);
+      border-bottom-color: var(--line);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    &.is-hidden {
+      transform: translateY(-100%);
+    }
+
+    &.is-open {
+      background: var(--c-green);
+    }
+  }
+
+  .header__bar {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(1.25rem, 2vw, 2.5rem);
+    height: var(--header-h);
+    --header-fs: clamp(0.8125rem, 0.6rem + 0.3vw, 0.9375rem);
+  }
+
+  // Bigger BG® mark, vertically centred with the nav
+  .header__logo {
+    display: flex;
+    align-items: center;
+    flex: none;
+
+    :global(.logo) {
+      height: clamp(2rem, 1.6rem + 1vw, 2.5rem);
+      // The ® adds height above the letters, so the box centre sits above the "BG" centre.
+      // Shift up so the letters' optical centre matches the nav caps (measured: 7% of height).
+      transform: translateY(-7%);
+    }
+  }
+
+  .header__nav {
+    display: none;
+
+    @include up(xl) {
+      display: block;
+      margin-left: auto;
+    }
+
+    ul {
+      display: flex;
+      align-items: center;
+      gap: clamp(1rem, 1.9vw, 2rem);
+    }
+  }
+
+  .header__link {
+    position: relative;
+    display: block;
+    padding-block: 0.5rem;
+    font-size: var(--header-fs);
+    font-weight: 400;
+    line-height: 1;
+    white-space: nowrap;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.4s var(--ease-out);
+    }
+
+    &[aria-current='page']::after {
+      transform: scaleX(1);
+    }
+
+    @include hover {
+      &::after {
+        transform: scaleX(1);
+        transform-origin: left;
+      }
+    }
+  }
+
+  // phone + quote button, right of the nav (desktop only — the mobile menu has its own)
+  .header__actions {
+    display: none;
+
+    @include up(xl) {
+      display: flex;
+      align-items: center;
+      gap: clamp(1.25rem, 2vw, 2rem);
+    }
+  }
+
+  .header__phone {
+    font-size: var(--header-fs);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 0.3s;
+
+    @include hover {
+      color: var(--accent);
+    }
+  }
+
+  .header__cta {
+    min-height: 2.75rem;
+    padding-inline: 1.25rem;
+  }
+
+  .header__burger {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-right: -0.5rem;
+
+    @include up(xl) {
+      display: none;
+    }
+  }
+
+  .header__burger-lines {
+    display: grid;
+    gap: 7px;
+    width: 24px;
+
+    span {
+      height: 1px;
+      background: currentColor;
+      transition: transform 0.4s var(--ease-out);
+    }
+  }
+
+  .is-open .header__burger-lines {
+    span:first-child {
+      transform: translateY(4px) rotate(45deg);
+    }
+
+    span:last-child {
+      transform: translateY(-4px) rotate(-45deg);
+    }
+  }
+
+  /* --- mobile menu --- */
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background: var(--c-green);
+    color: var(--c-white);
+    padding-top: calc(var(--header-h) + 1rem);
+    overflow-y: auto;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .menu__nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: calc(100svh - var(--header-h) - 2rem);
+    gap: 2.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .menu__item {
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  .menu__link {
+    display: block;
+    padding-block: 0.8rem;
+    @include display(clamp(1.5rem, 5.5vw, 2.25rem));
+
+    &[aria-current='page'] {
+      color: var(--c-sage);
+    }
+  }
+
+  // two full-width buttons pinned to the bottom of the menu
+  .menu__footer {
+    display: grid;
+    gap: 0.75rem;
+
+    .btn {
+      min-height: 3.5rem;
+    }
+  }
+
+  .menu__call {
+    font-size: 0.9375rem;
+    letter-spacing: 0.01em;
+    text-transform: none;
+  }
+</style>

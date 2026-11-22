@@ -11,7 +11,8 @@
  *
  * Portrait: uploaded photo, or initials on brand green until one is added.
  */
-import type { BlockOf } from '@/content.config';
+import type { BlockOf } from '@/schemas/blocks';
+import Img from '@/components/ui/Img.astro';
 
 type Props = BlockOf<'people'>;
 const { eyebrow, title, text, quote, signature, items } = Astro.props;
@@ -43,7 +44,7 @@ const cols = Math.min(Math.max(items.length, 2), 3);
           <li class:list={['person', { 'person--compact': !p.photo }]}>
             {p.photo ? (
               <div class="person__portrait">
-                <img src={p.photo} alt={p.name} loading="lazy" width="800" height="1000" />
+                <Img src={p.photo} sizes="(min-width: 1024px) 25vw, 50vw" alt={p.name} loading="lazy" width="800" height="1000" />
               </div>
             ) : (
               <span class="person__avatar" aria-hidden="true">

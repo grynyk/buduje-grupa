@@ -1,0 +1,157 @@
+---
+/** Green section: sticky heading left, numbered steps right with a progress rail (animations.ts → processTimeline). */
+import { pad } from '@/lib/format';
+import type { BlockOf } from '@/schemas/blocks';
+
+type Props = BlockOf<'process'>;
+const data = Astro.props;
+---
+
+<section class="process section theme-dark" data-process>
+  <div class="container process__grid">
+    <header class="process__head">
+      {data.eyebrow && <p class="eyebrow" data-reveal>{data.eyebrow}</p>}
+      {data.title && <h2 class="display" data-split>{data.title}</h2>}
+      {data.text && <p class="lead" data-reveal>{data.text}</p>}
+    </header>
+
+    <ol role="list" class="process__steps">
+      <span class="process__rail" aria-hidden="true"><span data-process-line></span></span>
+      {
+        data.steps.map((step, i) => (
+          <li class="step" data-step>
+            <span class="step__dot" aria-hidden="true" />
+            <span class="step__num" aria-hidden="true">
+              {pad(i + 1)}
+            </span>
+            <div class="step__body">
+              <h3 class="step__title">
+                <span class="sr-only">Krok {i + 1}: </span>
+                {step.title}
+              </h3>
+              <p class="step__text">{step.text}</p>
+              {step.meta && <p class="step__meta">{step.meta}</p>}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style lang="scss">
+  .process__grid {
+    display: grid;
+    gap: clamp(3rem, 6vw, 6rem);
+
+    // two columns only from xl: long Polish words in the heading need the room
+    @include up(xl) {
+      grid-template-columns: 1fr 1.2fr;
+      align-items: start;
+    }
+  }
+
+  .process__head {
+    display: grid;
+    gap: 1.5rem;
+
+    @include up(xl) {
+      position: sticky;
+      top: calc(var(--header-h) + 3rem);
+    }
+  }
+
+  .process__steps {
+    position: relative;
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 4.5rem);
+    padding-left: 2.5rem;
+
+    @include up(md) {
+      padding-left: 3.5rem;
+    }
+  }
+
+  .process__rail {
+    position: absolute;
+    top: 0.6rem;
+    bottom: 0.6rem;
+    left: 0.4375rem;
+    width: 1px;
+    background: var(--line);
+
+    span {
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      transform-origin: top;
+      transform: scaleY(0);
+    }
+  }
+
+  .step {
+    position: relative;
+    display: grid;
+    gap: 0.5rem 2rem;
+
+    @include up(md) {
+      grid-template-columns: 7rem 1fr;
+    }
+  }
+
+  .step__dot {
+    position: absolute;
+    top: 0.5rem;
+    left: -2.5rem;
+    width: 0.875rem;
+    height: 0.875rem;
+    border: 1px solid rgb(255 255 255 / 0.35);
+    border-radius: 50%;
+    background: var(--bg);
+    transition:
+      background 0.4s,
+      border-color 0.4s;
+
+    @include up(md) {
+      left: -3.5rem;
+    }
+  }
+
+  :global(.step.is-active) .step__dot {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .step__num {
+    @include display(clamp(3rem, 5vw, 4.5rem));
+    font-weight: 200;
+    line-height: 0.9;
+    color: rgb(255 255 255 / 0.3); // inactive: dim white; active: sage accent
+    transition: color 0.5s;
+  }
+
+  :global(.step.is-active) .step__num {
+    color: var(--accent);
+  }
+
+  .step__title {
+    @include label;
+    font-size: 0.8125rem;
+    padding-top: 0.6rem;
+  }
+
+  .step__text {
+    margin-top: 0.75rem;
+    color: var(--muted);
+    max-width: 44ch;
+  }
+
+  .step__meta {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8125rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+</style>

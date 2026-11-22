@@ -1,0 +1,45 @@
+---
+/**
+ * "Odbierz poradnik" form: name + e-mail + consent.
+ * The request reaches the company inbox with the subject "Poradnik inwestora — …".
+ * Sending the PDF to the visitor: Web3Forms autoresponder (Pro) or a reply from the inbox — see README.
+ * If `pdf` is set, a download link appears after a successful send as a backup.
+ */
+import Icon from '@/components/ui/Icon.astro';
+import Field from './Field.astro';
+import Web3Form from './Web3Form.astro';
+
+interface Props {
+  /** prefix for element ids (unique per page) */
+  id: string;
+  buttonLabel?: string;
+  note?: string;
+  pdf?: string;
+}
+const { id, buttonLabel = 'Odbieram bezpłatny poradnik', note, pdf } = Astro.props;
+---
+
+<Web3Form
+  class="guide-form"
+  subject="Poradnik inwestora — prośba o PDF (buduje-grupa.eu)"
+  fromName="BUDUJE GRUPA — poradnik"
+  submitLabel={buttonLabel}
+  success="Dziękujemy! Poradnik wyślemy na podany adres e-mail."
+  consent="Wyrażam zgodę na przetwarzanie moich danych w celu przesłania poradnika."
+  consentError="Zgoda jest wymagana, abyśmy mogli wysłać poradnik."
+  note={note}
+>
+  <input type="hidden" name="temat" value="Poradnik inwestora (PDF)" />
+  <div class="form__grid">
+    <Field id={`${id}-name`} name="name" label="Imię" error="Podaj imię." type="text" autocomplete="given-name" placeholder="Jan" required minlength="2" />
+    <Field id={`${id}-email`} name="email" label="E-mail" error="Podaj poprawny adres e-mail." type="email" autocomplete="email" placeholder="twoj@email.pl" required />
+  </div>
+
+  {
+    pdf && (
+      <a slot="after-submit" href={pdf} class="link-arrow guide-form__download" download hidden data-download>
+        Pobierz poradnik teraz <Icon name="arrow-down" />
+      </a>
+    )
+  }
+</Web3Form>

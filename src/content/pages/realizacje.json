@@ -1,0 +1,18 @@
+{
+  "seo": {
+    "title": "Realizacje — domy szkieletowe | BUDUJE GRUPA",
+    "description": "Domy, które już mają adresy — realizacje BUDUJE GRUPA."
+  },
+  "prefooter": "visit",
+  "blocks": [
+    {
+      "_template": "pageHero",
+      "layout": "split",
+      "eyebrow": "Realizacje",
+      "title": "Domy, które już mają adresy."
+    },
+    {
+      "_template": "projectList"
+    }
+  ]
+}

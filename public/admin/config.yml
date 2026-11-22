@@ -1,7 +1,8 @@
 # yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
 #
 # Sveltia CMS — https://sveltiacms.app/en/docs
-# Fields mirror src/content.config.ts: when you add a field here, add it there too (and vice versa).
+# Fields mirror the Zod schemas in src/schemas/ (+ src/content.config.ts).
+# After changing either side run `yarn check:cms` — it reports fields that exist on one side only.
 # Fields are REQUIRED by default in Sveltia — optional ones say `required: false`.
 
 backend:
@@ -19,10 +20,12 @@ backend:
   # base_url: https://sveltia-cms-auth.<SUBDOMAIN>.workers.dev
 
 site_url: https://buduje-grupa.storyvoteapp.workers.dev
-media_folder: public/images
+# Photos live in src/assets/images so Astro can resize them and convert them to WebP (src/lib/images.ts);
+# content still refers to them as /images/<file>.
+media_folder: src/assets/images
 public_folder: /images
 
-# Astro's Zod schemas reject "" / null for .optional() fields — leave empty fields out instead
+# Astro's Zod schemas reject "" / null for optional fields — leave empty fields out instead
 output:
   omit_empty_optional_fields: true
   json:
@@ -35,247 +38,45 @@ slug:
   clean_accents: true
 
 collections:
-  # ───────────────────────── Global settings + home page ─────────────────────────
-  - name: config
-    label: Ustawienia i strona główna
-    icon: settings
-    files:
-      - name: settings
-        label: Ustawienia firmy
-        file: src/content/settings/global.json
-        fields:
-          - { name: companyName, label: Nazwa firmy }
-          - { name: legalName, label: Pełna nazwa prawna, required: false }
-          - { name: tagline, label: Slogan, widget: text, required: false }
-          - { name: phone, label: Telefon, required: false }
-          - { name: email, label: E-mail, required: false }
-          - { name: address, label: Adres (ulica), required: false }
-          - { name: city, label: Kod i miasto, required: false }
-          - { name: hours, label: Godziny pracy, required: false }
-          - { name: nip, label: NIP / KRS / REGON, required: false }
-          - name: openingHours
-            label: Godziny dla Google
-            hint: 'Format: Mo-Sa 09:00-18:00'
-            required: false
-          - name: geo
-            label: Położenie biura (mapa i Google)
-            widget: object
-            required: false
-            fields:
-              - { name: lat, label: Szerokość (lat), widget: number, value_type: float }
-              - { name: lng, label: Długość (lng), widget: number, value_type: float }
-          - name: socials
-            label: Social media i mapa
-            widget: list
-            required: false
-            summary: '{{fields.label}}'
-            fields:
-              - { name: label, label: Nazwa }
-              - { name: url, label: 'URL (# = brak linku)' }
-              - name: icon
-                label: Ikona
-                widget: select
-                required: false
-                options:
-                  - { value: instagram, label: Instagram }
-                  - { value: facebook, label: Facebook }
-                  - { value: youtube, label: YouTube }
-                  - { value: map, label: Mapa (Google Maps) }
-          - name: prefooter
-            label: Pasek nad stopką (beżowy)
-            hint: Wyświetlany na podstronach. Wariant wybierasz w każdej podstronie.
-            widget: object
-            fields:
-              - name: quote
-                label: Cytat
-                widget: object
-                fields: &prefooter_fields
-                  - { name: title, label: Tytuł }
-                  - { name: text, label: Opis, required: false }
-                  - name: button
-                    label: Przycisk
-                    widget: object
-                    required: false
-                    fields: &link_fields
-                      - { name: label, label: Tekst }
-                      - { name: href, label: Link }
-              - { name: visit, label: Wizyta na budowie, widget: object, fields: *prefooter_fields }
-              - { name: custom, label: Projekt indywidualny, widget: object, fields: *prefooter_fields }
-
-      - name: home
-        label: Strona główna
-        file: src/content/pages/home.json
-        preview_path: /
-        fields:
-          - name: seo
-            label: SEO
-            widget: object
-            fields: &seo_fields
-              - { name: title, label: Meta title }
-              - { name: description, label: Meta description, widget: text }
-          - name: hero
-            label: Hero
-            widget: object
-            fields:
-              - { name: eyebrow, label: Nadtytuł, required: false }
-              - { name: titleLines, label: Tytuł (każda linia osobno), widget: list }
-              - { name: subtitle, label: Podtytuł, widget: text, required: false }
-              - { name: image, label: Zdjęcie tła, widget: image }
-              - { name: primaryCta, label: Przycisk główny, widget: object, fields: *link_fields }
-              - { name: secondaryCta, label: Przycisk drugi, widget: object, required: false, fields: *link_fields }
-              - name: badges
-                label: Wyróżniki
-                widget: list
-                required: false
-                summary: '{{fields.value}} — {{fields.label}}'
-                fields:
-                  - { name: value, label: Wartość }
-                  - { name: label, label: Opis }
-          - { name: marquee, label: Pasek przewijany, widget: list, required: false }
-          - name: about
-            label: O nas
-            widget: object
-            fields:
-              - { name: eyebrow, label: Nadtytuł, required: false }
-              - { name: title, label: Tytuł, widget: text }
-              - { name: text, label: Opis, widget: text, required: false }
-              - { name: image, label: Zdjęcie główne, widget: image }
-              - { name: imageSecondary, label: Zdjęcie dodatkowe, widget: image, required: false }
-              - { name: highlights, label: Wyróżnienia, widget: list, required: false }
-              - { name: cta, label: Link, widget: object, required: false, fields: *link_fields }
-          - name: stats
-            label: Liczby
-            widget: list
-            required: false
-            summary: '{{fields.value}}{{fields.suffix}} {{fields.label}}'
-            fields:
-              - { name: value, label: Wartość, widget: number, value_type: float }
-              - name: decimals
-                label: Miejsca po przecinku
-                hint: np. 1 → 5,0
-                widget: number
-                value_type: int
-                required: false
-              - { name: suffix, label: 'Sufiks (np. +, %)', required: false }
-              - { name: label, label: Opis }
-          - name: projects
-            label: Realizacje — nagłówek
-            widget: object
-            fields: &intro_fields
-              - { name: eyebrow, label: Nadtytuł, required: false }
-              - { name: title, label: Tytuł, required: false }
-              - { name: text, label: Opis, widget: text, required: false }
-          - name: process
-            label: Proces
-            widget: object
-            fields:
-              - { name: eyebrow, label: Nadtytuł, required: false }
-              - { name: title, label: Tytuł, required: false }
-              - { name: text, label: Opis, widget: text, required: false }
-              - name: steps
-                label: Kroki
-                widget: list
-                summary: '{{fields.title}}'
-                fields:
-                  - { name: title, label: Tytuł }
-                  - { name: text, label: Opis, widget: text }
-                  - { name: meta, label: Czas / dodatkowa informacja, required: false }
-          - name: testimonials
-            label: Opinie (sekcja nieużywana na stronie głównej)
-            widget: object
-            collapsed: true
-            fields:
-              - { name: eyebrow, label: Nadtytuł, required: false }
-              - { name: title, label: Tytuł }
-              - name: rating
-                label: Ocena Google (zapasowa, gdy brak klucza API)
-                widget: object
-                required: false
-                fields:
-                  - { name: score, label: 'Ocena (np. 5,0)' }
-                  - { name: count, label: Liczba opinii, widget: number, value_type: int }
-                  - { name: source, label: Źródło, required: false, default: Google }
-                  - { name: url, label: Link do opinii, required: false }
-              - name: items
-                label: Opinie
-                widget: list
-                required: false
-                summary: '{{fields.author}}'
-                fields:
-                  - { name: quote, label: Treść, widget: text }
-                  - { name: author, label: Autor }
-                  - { name: role, label: Inwestycja / rola, required: false }
-          - name: cta
-            label: Baner CTA
-            widget: object
-            fields:
-              - { name: title, label: Tytuł }
-              - { name: text, label: Opis, widget: text, required: false }
-              - { name: image, label: Zdjęcie, widget: image }
-              - { name: button, label: Przycisk, widget: object, fields: *link_fields }
-          - { name: contact, label: Kontakt — nagłówek, widget: object, required: false, fields: *intro_fields }
-          - name: instagram
-            label: Instagram
-            widget: object
-            required: false
-            fields:
-              - { name: eyebrow, label: Nadtytuł, required: false }
-              - { name: title, label: Tytuł, required: false }
-              - { name: text, label: Opis, widget: text, required: false }
-              - name: posts
-                label: Posty
-                hint: 'Linki do postów, np. https://www.instagram.com/p/…/ (pokazujemy 3)'
-                widget: list
-                required: false
-
-  # ───────────────────────── Pages built from sections ─────────────────────────
-  - name: site
-    label: Podstrony
-    label_singular: Podstrona
+  # ═════════════════════════ Pages (page builder) ═════════════════════════
+  - name: pages
+    label: Strony
+    label_singular: Strona
+    description: >-
+      Każda strona to lista sekcji, które możesz dodawać, usuwać i przestawiać.
+      Strona główna i strona 404 są w „Strony stałe”.
+      Nowa strona ma adres /nazwa-pliku — dodaj ją do menu w Ustawienia → Menu i stopka.
     icon: description
-    folder: src/content/site
+    folder: src/content/pages
     extension: json
     format: json
     create: true
     summary: '{{seo.title}} — /{{slug}}'
     slug:
       template: '{{seo.title}}'
-      hint: 'Adres strony, np. o-nas → /o-nas. Dodaj go do menu w src/lib/nav.ts.'
+      hint: 'Adres strony, np. o-nas → /o-nas'
       pattern: ['^[a-z0-9-]+$', 'Tylko małe litery, cyfry i myślniki']
     preview_path: '/{{slug}}'
-    fields:
-      - { name: seo, label: SEO, widget: object, fields: [{ name: title, label: Meta title }, { name: description, label: Meta description, widget: text, required: false }] }
+    fields: &page_fields
+      - name: seo
+        label: SEO (Google, udostępnianie)
+        widget: object
+        fields:
+          - { name: title, label: Tytuł strony (meta title), hint: 'Ok. 50–60 znaków, z nazwą firmy na końcu' }
+          - { name: description, label: Opis (meta description), widget: text, required: false, hint: 'Ok. 140–160 znaków — widoczny w wynikach Google' }
+          - &seo_image { name: image, label: Obraz do udostępniania, widget: image, required: false, hint: 'Puste = pierwsze zdjęcie na stronie' }
+          - &seo_noindex { name: noindex, label: Ukryj przed Google (noindex), widget: boolean, required: false, default: false }
       - name: prefooter
         label: Pasek nad stopką
-        hint: 'Treści pasków edytujesz w: Ustawienia firmy → Pasek nad stopką'
+        hint: 'Treści pasków edytujesz w: Ustawienia → Menu i stopka'
         widget: select
         required: false
         default: quote
-        options:
+        options: &prefooter_options
           - { value: quote, label: '„Budujemy tak, jakbyśmy budowali dla siebie.”' }
           - { value: visit, label: 'Chcesz zobaczyć dom na żywo?' }
           - { value: custom, label: 'Nie znalazłeś swojego domu?' }
           - { value: none, label: Brak }
-      - name: hero
-        label: Nagłówek strony (opcjonalny)
-        widget: object
-        required: false
-        fields:
-          - name: layout
-            label: Układ
-            widget: select
-            required: false
-            default: split
-            options:
-              - { value: split, label: Tytuł + opis obok (białe tło) }
-              - { value: image-side, label: Tekst + zdjęcie obok }
-              - { value: image-bg, label: Zdjęcie w tle }
-              - { value: dark, label: Zielone tło }
-          - { name: eyebrow, label: Nadtytuł, required: false }
-          - { name: title, label: Tytuł }
-          - { name: text, label: Opis, widget: text, required: false }
-          - { name: image, label: Zdjęcie, widget: image, required: false }
-          - { name: imageAlt, label: Opis zdjęcia (alt), required: false }
       - name: blocks
         label: Sekcje
         label_singular: Sekcja
@@ -283,15 +84,100 @@ collections:
         required: false
         typeKey: _template
         types:
-          - name: features
-            label: Lista cech (kolumny)
+          # ───────────── Page openers ─────────────
+          - name: hero
+            label: 'Otwarcie — pełny ekran ze zdjęciem (strona główna)'
+            summary: '{{fields.titleLines}}'
+            fields:
+              - &anchor
+                name: anchor
+                label: Kotwica
+                hint: 'Opcjonalnie: np. kontakt → link „#kontakt” przewija do tej sekcji'
+                required: false
+                pattern: ['^[a-z0-9-]+$', 'Tylko małe litery, cyfry i myślniki']
+              - &eyebrow { name: eyebrow, label: Nadtytuł, required: false }
+              - { name: titleLines, label: Tytuł (każda linia osobno), widget: list }
+              - { name: subtitle, label: Podtytuł, widget: text, required: false }
+              - { name: image, label: Zdjęcie tła, widget: image }
+              - { name: primaryCta, label: Przycisk główny, widget: object, fields: &link_fields [{ name: label, label: Tekst }, { name: href, label: Link }] }
+              - { name: secondaryCta, label: Przycisk drugi, widget: object, required: false, fields: *link_fields }
+              - name: badges
+                label: Wyróżniki pod tytułem
+                hint: 'Wyróżnik z „Google” w opisie pokazuje aktualną ocenę z Google'
+                widget: list
+                required: false
+                summary: '{{fields.value}} — {{fields.label}}'
+                fields:
+                  - { name: value, label: Wartość }
+                  - { name: label, label: Opis }
+              - { name: showSocials, label: Pokaż ikony social media, widget: boolean, required: false, default: true }
+
+          - name: pageHero
+            label: 'Otwarcie — nagłówek podstrony'
             summary: '{{fields.title}}'
             fields:
-              - &eyebrow { name: eyebrow, label: Nadtytuł, required: false }
-              - &title_opt { name: title, label: Tytuł, required: false }
+              - *anchor
+              - name: layout
+                label: Układ
+                widget: select
+                required: false
+                default: split
+                options:
+                  - { value: split, label: Tytuł + opis obok (białe tło) }
+                  - { value: image-side, label: Tekst + zdjęcie obok }
+                  - { value: image-bg, label: Zdjęcie w tle }
+                  - { value: dark, label: Zielone tło }
+              - *eyebrow
+              - &title_req { name: title, label: Tytuł }
               - &text_opt { name: text, label: Opis, widget: text, required: false }
-              - { name: numbered, label: 'Numeruj (01, 02…)', widget: boolean, required: false, default: false }
-              - { name: columns, label: Liczba kolumn (2–4), widget: number, value_type: int, min: 2, max: 4, required: false, default: 3 }
+              - &image_opt { name: image, label: Zdjęcie, widget: image, required: false }
+              - &image_alt { name: imageAlt, label: Opis zdjęcia (alt), required: false, hint: 'Dla niewidomych i Google — co widać na zdjęciu' }
+              - &button_opt { name: button, label: Przycisk, widget: object, required: false, fields: *link_fields }
+
+          # ───────────── Home-page style sections ─────────────
+          - name: marquee
+            label: Pasek przewijanych haseł
+            fields:
+              - *anchor
+              - { name: items, label: Hasła, widget: list, required: false }
+
+          - name: about
+            label: O firmie (tekst + kolaż zdjęć + liczby)
+            summary: '{{fields.eyebrow}}'
+            fields:
+              - *anchor
+              - *eyebrow
+              - { name: title, label: Tytuł, widget: text }
+              - *text_opt
+              - &image_req { name: image, label: Zdjęcie, widget: image }
+              - *image_alt
+              - { name: imageSecondary, label: Zdjęcie dodatkowe (mniejsze), widget: image, required: false }
+              - { name: imageSecondaryAlt, label: Opis zdjęcia dodatkowego (alt), required: false }
+              - { name: highlights, label: Wyróżnienia (lista z ✓), widget: list, required: false }
+              - { name: cta, label: Link pod listą, widget: object, required: false, fields: *link_fields }
+              - { name: stamp, label: Napis na okrągłej pieczęci, required: false, hint: 'np. Domy szkieletowe · Krzeszowice · — puste = bez pieczęci' }
+              - name: stats
+                label: Liczby (animowane)
+                hint: 'Liczba z „Google” w opisie pokazuje aktualną ocenę z Google'
+                widget: list
+                required: false
+                summary: '{{fields.value}}{{fields.suffix}} {{fields.label}}'
+                fields:
+                  - { name: value, label: Wartość, widget: number, value_type: float }
+                  - { name: decimals, label: Miejsca po przecinku, hint: np. 1 → 5,0, widget: number, value_type: int, required: false, default: 0 }
+                  - { name: suffix, label: 'Sufiks (np. +, %)', required: false }
+                  - { name: label, label: Opis }
+
+          - name: featuredProjects
+            label: Wybrane realizacje (rząd kart)
+            hint: 'Pokazuje realizacje oznaczone jako „Wyróżniona” (albo pierwsze z listy)'
+            summary: '{{fields.title}}'
+            fields:
+              - *anchor
+              - *eyebrow
+              - &title_opt { name: title, label: Tytuł, required: false }
+              - { name: buttonLabel, label: Tekst przycisku, required: false, default: Wszystkie realizacje }
+              - { name: limit, label: Liczba kart, widget: number, value_type: int, min: 1, max: 6, required: false, default: 3 }
               - &theme
                 name: theme
                 label: Tło
@@ -302,6 +188,104 @@ collections:
                   - { value: paper, label: Beżowe }
                   - { value: sage, label: Szałwia (jasna zieleń) }
                   - { value: dark, label: Zielone }
+
+          - name: projectList
+            label: Wszystkie realizacje (siatka z filtrami)
+            fields:
+              - *anchor
+              - { name: allLabel, label: Etykieta filtra „wszystkie”, required: false, default: Wszystkie }
+
+          - name: process
+            label: Proces (zielony, kroki z osią)
+            summary: '{{fields.title}}'
+            fields:
+              - *anchor
+              - *eyebrow
+              - *title_opt
+              - *text_opt
+              - name: steps
+                label: Kroki
+                widget: list
+                required: false
+                summary: '{{fields.title}}'
+                fields:
+                  - { name: title, label: Tytuł }
+                  - { name: text, label: Opis, widget: text }
+                  - { name: meta, label: Czas / dodatkowa informacja, required: false }
+
+          - name: instagram
+            label: Instagram (posty)
+            summary: '{{fields.title}}'
+            fields:
+              - *anchor
+              - *eyebrow
+              - *title_opt
+              - *text_opt
+              - { name: posts, label: Posty, hint: 'Linki do postów, np. https://www.instagram.com/p/…/ (pokazujemy 3)', widget: list, required: false }
+
+          - name: banner
+            label: Baner CTA (zdjęcie w tle)
+            summary: '{{fields.title}}'
+            fields:
+              - *anchor
+              - *title_req
+              - *text_opt
+              - *image_req
+              - &button_req { name: button, label: Przycisk, widget: object, fields: *link_fields }
+
+          - name: testimonials
+            label: Opinie klientów (ocena Google + cytaty)
+            hint: 'Gdy ustawiony jest klucz Google Places, cytaty zastępują opinie z Google'
+            summary: '{{fields.title}}'
+            fields:
+              - *anchor
+              - *eyebrow
+              - *title_req
+              - name: items
+                label: Opinie
+                widget: list
+                required: false
+                summary: '{{fields.author}}'
+                fields:
+                  - { name: quote, label: Treść, widget: text }
+                  - { name: author, label: Autor }
+                  - { name: role, label: Inwestycja / rola, required: false }
+              - { name: showRating, label: Pokaż ocenę Google, widget: boolean, required: false, default: true }
+
+          - name: contact
+            label: Kontakt (dane firmy + formularz)
+            summary: '{{fields.title}}'
+            fields:
+              - *anchor
+              - &heading
+                name: heading
+                label: Nagłówek
+                widget: select
+                required: false
+                default: h2
+                options:
+                  - { value: h1, label: H1 — sekcja otwiera stronę }
+                  - { value: h2, label: H2 — inna sekcja jest wyżej }
+              - *eyebrow
+              - *title_opt
+              - *text_opt
+              - { name: formTitle, label: Tytuł formularza, required: false }
+              - { name: choicesLabel, label: Etykieta pola tematu (np. Temat), required: false }
+              - { name: choices, label: Podpowiedzi tematów (można wpisać własny), widget: list, required: false }
+              - &note { name: note, label: Notka pod przyciskiem, required: false }
+
+          # ───────────── Content sections ─────────────
+          - name: features
+            label: Lista cech (kolumny)
+            summary: '{{fields.title}}'
+            fields:
+              - *anchor
+              - *eyebrow
+              - *title_opt
+              - *text_opt
+              - { name: numbered, label: 'Numeruj (01, 02…)', widget: boolean, required: false, default: false }
+              - { name: columns, label: Liczba kolumn (2–4), widget: number, value_type: int, min: 2, max: 4, required: false, default: 3 }
+              - *theme
               - name: layout
                 label: Układ
                 widget: select
@@ -323,12 +307,13 @@ collections:
                     label: Ikona
                     widget: select
                     required: false
-                    options: [calendar, thermometer, clock, leaf, house, check, installations, renovation]
+                    options: [calendar, thermometer, clock, leaf, house, check, installations, renovation, apartments, commercial, interior, phone, mail, pin]
 
           - name: people
             label: Zespół / założyciele
             summary: '{{fields.title}}'
             fields:
+              - *anchor
               - *eyebrow
               - *title_opt
               - *text_opt
@@ -350,15 +335,17 @@ collections:
             label: Cytat (zielony)
             summary: '{{fields.text | truncate(60)}}'
             fields:
+              - *anchor
               - { name: text, label: Cytat, widget: text }
-              - &button_opt { name: button, label: Przycisk, widget: object, required: false, fields: *link_fields }
+              - *button_opt
 
           - name: mediaText
             label: Zdjęcie + tekst
             summary: '{{fields.title}}'
             fields:
-              - &image_req { name: image, label: Zdjęcie, widget: image }
-              - &image_alt { name: imageAlt, label: Opis zdjęcia (alt), required: false }
+              - *anchor
+              - *image_req
+              - *image_alt
               - *eyebrow
               - *title_opt
               - *text_opt
@@ -379,6 +366,7 @@ collections:
           - name: packages
             label: Pakiety / standardy
             fields:
+              - *anchor
               - name: items
                 label: Pakiety
                 widget: list
@@ -396,44 +384,18 @@ collections:
               - { name: included, label: W każdym pakiecie, widget: list, required: false }
 
           - name: steps
-            label: Kroki (proces)
+            label: Kroki (proces w poziomie)
             summary: '{{fields.eyebrow}}'
             fields:
+              - *anchor
               - *eyebrow
               - { <<: *titled_items, label: Kroki }
-
-          - name: guide
-            label: Poradnik — formularz (wysyłka na e-mail)
-            summary: '{{fields.title}}'
-            fields:
-              - name: variant
-                label: Wariant
-                widget: select
-                required: false
-                default: hero
-                options:
-                  - { value: hero, label: Otwiera stronę (H1) }
-                  - { value: closing, label: Zielony pas na końcu strony }
-              - *eyebrow
-              - { name: title, label: Tytuł }
-              - *text_opt
-              - { name: topics, label: Tematy (lista), widget: list, required: false }
-              - { name: image, label: Okładka poradnika (opcjonalnie), widget: image, required: false }
-              - { name: formTitle, label: Tytuł formularza, required: false }
-              - { name: buttonLabel, label: Tekst przycisku, required: false }
-              - { name: note, label: Notka pod przyciskiem, required: false }
-              - name: pdf
-                label: Plik PDF (pokazany po wysłaniu — opcjonalnie)
-                widget: file
-                required: false
-                media_folder: /public/poradnik
-                public_folder: /poradnik
-              - { name: showRating, label: Pokaż ocenę Google, widget: boolean, required: false, default: false }
 
           - name: commitment
             label: Zdjęcie + zobowiązania
             summary: '{{fields.title}}'
             fields:
+              - *anchor
               - *image_req
               - *image_alt
               - *eyebrow
@@ -447,6 +409,7 @@ collections:
             label: Proces szczegółowy (oś + etapy)
             summary: '{{fields.eyebrow}}'
             fields:
+              - *anchor
               - { name: eyebrow, label: Nadtytuł nad spisem etapów, required: false }
               - { name: weLabel, label: Nagłówek kolumny „po naszej stronie”, required: false }
               - { name: youLabel, label: Nagłówek kolumny „po Twojej stronie”, required: false }
@@ -467,6 +430,7 @@ collections:
           - name: stats
             label: Duże liczby
             fields:
+              - *anchor
               - *theme
               - name: items
                 label: Liczby
@@ -482,6 +446,7 @@ collections:
             label: Przekrój ściany (warstwy)
             summary: '{{fields.eyebrow}}'
             fields:
+              - *anchor
               - *eyebrow
               - name: items
                 label: Warstwy (od wnętrza)
@@ -494,20 +459,44 @@ collections:
                   - { name: color, label: Kolor, widget: color, allowInput: true }
                   - { name: width, label: Grubość (proporcja), widget: number, value_type: float, required: false, default: 10 }
 
-          - name: faq
-            label: FAQ (pytania)
+          - name: guide
+            label: Poradnik — formularz (wysyłka na e-mail)
             summary: '{{fields.title}}'
             fields:
-              - name: heading
-                label: Nagłówek
+              - *anchor
+              - name: variant
+                label: Wariant
                 widget: select
                 required: false
-                default: h1
+                default: hero
                 options:
-                  - { value: h1, label: H1 — sekcja otwiera stronę }
-                  - { value: h2, label: H2 — inna sekcja jest wyżej }
+                  - { value: hero, label: Otwiera stronę (H1) }
+                  - { value: closing, label: Zielony pas na końcu strony }
               - *eyebrow
-              - { name: title, label: Tytuł, required: false }
+              - *title_req
+              - *text_opt
+              - { name: topics, label: Tematy (lista), widget: list, required: false }
+              - { name: image, label: Okładka poradnika (opcjonalnie), widget: image, required: false }
+              - { name: formTitle, label: Tytuł formularza, required: false }
+              - { name: buttonLabel, label: Tekst przycisku, required: false }
+              - *note
+              - name: pdf
+                label: Plik PDF (pokazany po wysłaniu — opcjonalnie)
+                widget: file
+                required: false
+                media_folder: /public/poradnik
+                public_folder: /poradnik
+              - { name: showRating, label: Pokaż ocenę Google, widget: boolean, required: false, default: false }
+
+          - name: faq
+            label: FAQ (pytania)
+            hint: 'Pytania trafiają też do Google jako dane strukturalne FAQ'
+            summary: '{{fields.title}}'
+            fields:
+              - *anchor
+              - { <<: *heading, default: h1 }
+              - *eyebrow
+              - *title_opt
               - name: items
                 label: Pytania
                 widget: list
@@ -522,7 +511,7 @@ collections:
                 required: false
                 fields:
                   - *eyebrow
-                  - { name: title, label: Tytuł }
+                  - *title_req
                   - *text_opt
                   - *button_opt
               - { name: image, label: Zdjęcie boczne, widget: image, required: false }
@@ -531,6 +520,7 @@ collections:
             label: Artykuły (karty)
             summary: '{{fields.eyebrow}}'
             fields:
+              - *anchor
               - *eyebrow
               - *theme
               - name: items
@@ -539,14 +529,15 @@ collections:
                 required: false
                 summary: '{{fields.title}}'
                 fields:
-                  - { name: title, label: Tytuł }
-                  - { name: text, label: Opis, required: false }
+                  - *item_title
+                  - *text_opt
                   - { name: href, label: Link, required: false }
 
           - name: schedule
             label: Harmonogram płatności
             summary: '{{fields.eyebrow}}'
             fields:
+              - *anchor
               - *eyebrow
               - name: stages
                 label: Etapy
@@ -562,8 +553,9 @@ collections:
             label: Formularz kosztorysu
             summary: '{{fields.title}}'
             fields:
+              - *anchor
               - *eyebrow
-              - { name: title, label: Tytuł }
+              - *title_req
               - *text_opt
               - { name: standards, label: Standardy do wyboru, widget: list, required: false }
               - { name: buttonLabel, label: Tekst przycisku, required: false }
@@ -572,78 +564,42 @@ collections:
             label: Pasek CTA
             summary: '{{fields.title}}'
             fields:
-              - { name: title, label: Tytuł }
+              - *anchor
+              - *title_req
               - *text_opt
-              - { name: button, label: Przycisk, widget: object, fields: *link_fields }
+              - *button_req
               - *theme
 
           - name: catalog
-            label: Katalog projektów (lista)
-            hint: Lista projektów z kolekcji „Katalog projektów” — ta sekcja nie ma ustawień.
-
-          - name: contact
-            label: Kontakt (dane + formularz)
-            summary: '{{fields.title}}'
+            label: Katalog projektów (lista z filtrami)
+            hint: Lista projektów z kolekcji „Katalog projektów”.
             fields:
-              - *eyebrow
-              - { name: title, label: Tytuł strony, required: false }
-              - *text_opt
-              - { name: formTitle, label: Tytuł formularza, required: false }
-              - { name: choicesLabel, label: Etykieta pola tematu (np. Temat), required: false }
-              - { name: choices, label: Podpowiedzi tematów (można wpisać własny), widget: list, required: false }
-              - { name: note, label: Notka pod przyciskiem, required: false }
+              - *anchor
 
           - name: map
-            label: Mapa (pasek z adresem)
+            label: Mapa (pasek z adresem biura)
             fields:
-              - { name: label, label: Tekst (domyślnie adres biura), required: false }
+              - *anchor
+              - { name: label, label: Nadtytuł karty (domyślnie „Biuro”), required: false }
 
-  # ───────────────────────── Catalog (house designs) ─────────────────────────
-  - name: catalog
-    label: Katalog projektów
-    label_singular: Projekt
+  # Home page and 404 — same page builder, but in a file collection so they can't be deleted or renamed.
+  - name: fixed-pages
+    label: Strony stałe
+    description: Strona główna i strona „nie znaleziono” (404). Sekcje edytujesz jak w „Strony” — tych stron nie można usunąć.
     icon: home
-    folder: src/content/catalog
-    extension: md
-    format: frontmatter
-    create: true
-    slug:
-      hint: Adres projektu, np. las-90 → /katalog/las-90
-    preview_path: '/katalog/{{slug}}'
-    summary: '{{title}} · {{area}} m² · {{floors}}'
-    sortable_fields:
-      fields: [order, title, area]
-      default: { field: order, direction: ascending }
-    fields:
-      - { name: title, label: Nazwa (np. Las 90) }
-      - { name: area, label: Powierzchnia (m²), widget: number, value_type: float }
-      - { name: rooms, label: Pokoje (np. 3 pokoje) }
-      - { name: feature, label: Wyróżnik (np. antresola), required: false }
-      - { name: floors, label: Kondygnacje, widget: select, options: [parterowy, z poddaszem] }
-      - { name: image, label: Zdjęcie, widget: image }
-      - { name: excerpt, label: Krótki opis, widget: text, required: false }
-      - name: gallery
-        label: Galeria (wizualizacje)
-        widget: list
-        required: false
-        field: { name: image, label: Zdjęcie, widget: image }
-      - name: plans
-        label: Rzuty
-        widget: list
-        required: false
-        summary: '{{fields.label}}'
-        fields:
-          - { name: image, label: Rysunek, widget: image }
-          - { name: label, label: Podpis (np. Parter), required: false }
-      - name: modifications
-        label: Co możemy zmienić
-        hint: Puste = lista domyślna
-        widget: list
-        required: false
-      - { name: order, label: Kolejność, widget: number, value_type: int, required: false }
-      - { name: body, label: Opis, widget: markdown, required: false }
+    files:
+      - name: index
+        label: Strona główna
+        file: src/content/fixed-pages/index.json
+        preview_path: /
+        fields: *page_fields
+      - name: '404'
+        label: Strona 404 (nie znaleziono)
+        file: src/content/fixed-pages/404.json
+        preview_path: /404
+        fields: *page_fields
 
-  # ───────────────────────── Projects (Realizacje) ─────────────────────────
+  # ═════════════════════════ Projects (Realizacje) ═════════════════════════
   - name: projects
     label: Realizacje
     label_singular: Realizacja
@@ -672,7 +628,7 @@ collections:
       - { name: area, label: Powierzchnia (np. 240 m²), required: false }
       - { name: duration, label: Czas realizacji, required: false }
       - { name: scope, label: Zakres prac, required: false }
-      - { name: excerpt, label: Krótki opis, widget: text, required: false }
+      - { name: excerpt, label: Krótki opis, widget: text, required: false, hint: 'Pod tytułem i jako opis w Google' }
       - { name: cover, label: Zdjęcie główne, widget: image }
       - name: gallery
         label: Galeria
@@ -680,5 +636,176 @@ collections:
         required: false
         field: { name: image, label: Zdjęcie, widget: image }
       - { name: featured, label: Wyróżniona na stronie głównej, widget: boolean, required: false, default: false }
-      - { name: order, label: Kolejność, widget: number, value_type: int, required: false }
+      - &order { name: order, label: Kolejność, widget: number, value_type: int, required: false }
+      - &seo_override
+        name: seo
+        label: SEO (opcjonalnie)
+        hint: 'Puste pola = tytuł, opis i zdjęcie wpisu'
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - { name: title, label: Tytuł strony (meta title), required: false }
+          - { name: description, label: Opis (meta description), widget: text, required: false }
+          - *seo_image
+          - *seo_noindex
       - { name: body, label: Opis realizacji, widget: markdown, required: false }
+
+  # ═════════════════════════ Catalog (house designs) ═════════════════════════
+  - name: catalog
+    label: Katalog projektów
+    label_singular: Projekt
+    icon: home
+    folder: src/content/catalog
+    extension: md
+    format: frontmatter
+    create: true
+    slug:
+      hint: Adres projektu, np. las-90 → /katalog/las-90
+    preview_path: '/katalog/{{slug}}'
+    summary: '{{title}} · {{area}} m² · {{floors}}'
+    sortable_fields:
+      fields: [order, title, area]
+      default: { field: order, direction: ascending }
+    fields:
+      - { name: title, label: Nazwa (np. Las 90) }
+      - { name: area, label: Powierzchnia (m²), widget: number, value_type: float }
+      - { name: rooms, label: Pokoje (np. 3 pokoje) }
+      - { name: feature, label: Wyróżnik (np. antresola), required: false }
+      - { name: floors, label: Kondygnacje, widget: select, options: [parterowy, z poddaszem] }
+      - { name: image, label: Zdjęcie, widget: image }
+      - { name: excerpt, label: Krótki opis, widget: text, required: false, hint: 'Pod tytułem i jako opis w Google' }
+      - name: gallery
+        label: Galeria (wizualizacje)
+        widget: list
+        required: false
+        field: { name: image, label: Zdjęcie, widget: image }
+      - name: plans
+        label: Rzuty
+        widget: list
+        required: false
+        summary: '{{fields.label}}'
+        fields:
+          - { name: image, label: Rysunek, widget: image }
+          - { name: label, label: Podpis (np. Parter), required: false }
+      - name: modifications
+        label: Co możemy zmienić
+        hint: 'Puste = lista domyślna (Ustawienia → Strony szczegółów)'
+        widget: list
+        required: false
+      - *order
+      - *seo_override
+      - { name: body, label: Opis, widget: markdown, required: false }
+
+  # ═════════════════════════ Settings ═════════════════════════
+  - name: settings
+    label: Ustawienia
+    icon: settings
+    files:
+      - name: global
+        label: Firma, SEO i ocena Google
+        file: src/content/settings/global.json
+        fields:
+          - { name: companyName, label: Nazwa firmy }
+          - { name: legalName, label: Pełna nazwa prawna, required: false }
+          - { name: tagline, label: Slogan (też domyślny opis w Google), widget: text, required: false }
+          - { name: phone, label: Telefon, required: false }
+          - { name: email, label: E-mail, required: false }
+          - { name: address, label: Adres (ulica), required: false }
+          - { name: city, label: Kod i miasto, required: false }
+          - { name: hours, label: Godziny pracy, required: false }
+          - { name: nip, label: NIP / KRS / REGON, required: false }
+          - { name: openingHours, label: Godziny dla Google, hint: 'Format: Mo-Sa 09:00-18:00', required: false }
+          - name: geo
+            label: Położenie biura (mapa i Google)
+            widget: object
+            required: false
+            fields:
+              - { name: lat, label: Szerokość (lat), widget: number, value_type: float }
+              - { name: lng, label: Długość (lng), widget: number, value_type: float }
+          - name: socials
+            label: Social media i mapa
+            widget: list
+            required: false
+            summary: '{{fields.label}}'
+            fields:
+              - { name: label, label: Nazwa }
+              - { name: url, label: 'URL (# = brak linku)' }
+              - name: icon
+                label: Ikona
+                widget: select
+                required: false
+                options:
+                  - { value: instagram, label: Instagram }
+                  - { value: facebook, label: Facebook }
+                  - { value: youtube, label: YouTube }
+                  - { value: map, label: Mapa (Google Maps) }
+          - name: seo
+            label: SEO — ustawienia ogólne
+            widget: object
+            fields:
+              - { name: titleTemplate, label: Szablon tytułu, hint: '%s = nazwa realizacji / projektu, np. „%s | BUDUJE GRUPA”', required: false, default: '%s | BUDUJE GRUPA' }
+              - { name: image, label: Domyślny obraz do udostępniania, widget: image }
+              - { name: googleVerification, label: Kod weryfikacji Google Search Console, hint: 'Search Console → Tag HTML → wartość „content”', required: false }
+          - name: rating
+            label: Ocena Google (zapasowa, gdy brak klucza API)
+            widget: object
+            required: false
+            fields:
+              - { name: score, label: 'Ocena (np. 5 lub 4.8)', widget: number, value_type: float, min: 0, max: 5, step: 0.1 }
+              - { name: count, label: Liczba opinii, widget: number, value_type: int }
+              - { name: url, label: Link do opinii, required: false }
+
+      - name: layout
+        label: Menu i stopka
+        file: src/content/settings/layout.json
+        fields:
+          - name: nav
+            label: Menu
+            hint: 'Kolejność = kolejność w stopce. Odznacz „W nagłówku”, by link był tylko w stopce.'
+            widget: list
+            summary: '{{fields.label}} → {{fields.href}}'
+            fields:
+              - { name: label, label: Tekst }
+              - { name: href, label: Link (np. /o-nas) }
+              - { name: header, label: W nagłówku, widget: boolean, required: false, default: true }
+          - { name: cta, label: Przycisk w nagłówku i stopce, widget: object, fields: *link_fields }
+          - name: prefooter
+            label: Pasek nad stopką (beżowy)
+            hint: Wyświetlany na podstronach. Wariant wybierasz w każdej stronie.
+            widget: object
+            fields:
+              - name: quote
+                label: Cytat
+                widget: object
+                fields: &prefooter_fields
+                  - *title_req
+                  - { name: text, label: Opis, required: false }
+                  - *button_opt
+              - { name: visit, label: Wizyta na budowie, widget: object, fields: *prefooter_fields }
+              - { name: custom, label: Projekt indywidualny, widget: object, fields: *prefooter_fields }
+
+      - name: templates
+        label: Strony szczegółów (realizacje, katalog)
+        file: src/content/settings/templates.json
+        fields:
+          - name: project
+            label: Realizacja (/realizacje/…)
+            widget: object
+            fields:
+              - &template_prefooter { name: prefooter, label: Pasek nad stopką, widget: select, required: false, options: *prefooter_options }
+              - &ask_title { name: askTitle, label: Karta „zapytaj” — tytuł }
+              - &ask_text { name: askText, label: Karta „zapytaj” — opis, widget: text, required: false }
+              - &ask_button { name: askButton, label: Karta „zapytaj” — przycisk }
+          - name: catalog
+            label: Projekt z katalogu (/katalog/…)
+            widget: object
+            fields:
+              - *template_prefooter
+              - { name: eyebrow, label: Nadtytuł, required: false, default: Projekt domu }
+              - *ask_title
+              - *ask_text
+              - *ask_button
+              - { name: standards, label: Standardy w karcie „zapytaj”, widget: list, required: false }
+              - { name: modificationsTitle, label: Tytuł listy zmian, required: false, default: Co możemy zmienić }
+              - { name: modifications, label: Co możemy zmienić — lista domyślna, widget: list, required: false }

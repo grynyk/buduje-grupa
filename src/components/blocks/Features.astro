@@ -4,13 +4,12 @@
  *  grid  — heading on top, items in columns (O nas, Finansowanie)
  *  split — 12-col: heading + intro + link left (sticky), 2×2 benefit cells right with icons (Technologia)
  */
-import type { BlockOf } from '@/content.config';
-import Icon from '@/components/Icon.astro';
-import { pad } from '@/lib/content';
+import type { BlockOf } from '@/schemas/blocks';
+import Icon from '@/components/ui/Icon.astro';
+import { pad } from '@/lib/format';
 
 type Props = BlockOf<'features'>;
 const { eyebrow, title, text, items, numbered, columns, theme, layout, link } = Astro.props;
-type IconName = Parameters<typeof Icon>[0]['name'];
 const split = layout === 'split';
 ---
 
@@ -38,7 +37,7 @@ const split = layout === 'split';
               <div class="feature__top">
                 {item.icon && (
                   <span class="feature__icon" aria-hidden="true">
-                    <Icon name={item.icon as IconName} />
+                    <Icon name={item.icon} />
                   </span>
                 )}
                 {split && numbered && <span class="feature__index">{pad(i + 1)}</span>}

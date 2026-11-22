@@ -1,0 +1,58 @@
+{
+  "seo": {
+    "title": "Gwarancja — podpisujemy się pod każdym domem | BUDUJE GRUPA",
+    "description": "Pisemna gwarancja na konstrukcję, instalacje i prace wykończeniowe. Przegląd po roku i serwis także po zakończeniu gwarancji."
+  },
+  "prefooter": "quote",
+  "blocks": [
+    {
+      "_template": "pageHero",
+      "layout": "dark",
+      "eyebrow": "Gwarancja",
+      "title": "Podpisujemy się pod każdym domem.",
+      "text": "Na wykonane prace udzielamy pisemnej gwarancji. Okresy zapisujemy w umowie."
+    },
+    {
+      "_template": "stats",
+      "theme": "dark",
+      "items": [
+        {
+          "value": "[X]",
+          "unit": "lat",
+          "label": "gwarancji na konstrukcję nośną budynku"
+        },
+        {
+          "value": "[X]",
+          "unit": "lata",
+          "label": "gwarancji na instalacje i prace wykończeniowe"
+        }
+      ]
+    },
+    {
+      "_template": "mediaText",
+      "theme": "light",
+      "image": "/images/dom-stodola.jpg",
+      "imageAlt": "Dom szkieletowy z ciemną elewacją o zachodzie słońca",
+      "eyebrow": "Nasze zobowiązania",
+      "items": [
+        {
+          "title": "Materiały z certyfikatami",
+          "text": "Stosujemy materiały z deklaracjami właściwości użytkowych i gwarancjami producentów."
+        },
+        {
+          "title": "Dokumentacja odbiorowa",
+          "text": "Po zakończeniu budowy dostajesz komplet dokumentów i instrukcje użytkowania."
+        },
+        {
+          "title": "Przegląd po roku",
+          "text": "Wracamy na przegląd i sprawdzamy dom po pierwszym sezonie grzewczym."
+        },
+        {
+          "title": "Serwis",
+          "text": "Zgłoszenia przyjmujemy telefonicznie i mailowo — także po zakończeniu gwarancji."
+        }
+      ],
+      "note": "Karta gwarancyjna z podpisem założycieli — przekazywana razem z kluczami."
+    }
+  ]
+}

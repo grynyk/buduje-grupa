@@ -1,6 +1,6 @@
 ---
-import type { BlockOf } from '@/content.config';
-import Icon from '@/components/Icon.astro';
+import type { BlockOf } from '@/schemas/blocks';
+import Icon from '@/components/ui/Icon.astro';
 
 type Props = BlockOf<'articles'>;
 const { eyebrow, items, theme } = Astro.props;

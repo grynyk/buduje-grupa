@@ -1,0 +1,14 @@
+---
+/** Every page in src/content/pages/*.json — index.json is the home page, the rest are /<file name>. */
+import BlockPage from '@/layouts/BlockPage.astro';
+import { getPages } from '@/lib/content';
+
+export async function getStaticPaths() {
+  const pages = await getPages();
+  return pages.map((page) => ({ params: { slug: page.id === 'index' ? undefined : page.id }, props: { page } }));
+}
+
+const { page } = Astro.props;
+---
+
+<BlockPage page={page} />

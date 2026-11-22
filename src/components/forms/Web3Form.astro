@@ -1,0 +1,62 @@
+---
+/**
+ * Shared shell of every form on the site (Web3Forms): access key, subject, honeypot,
+ * consent checkbox, submit button, live status line.
+ * Fields go in the default slot; `after-submit` sits under the button (e.g. a download link).
+ * Behaviour (validation, fetch submit, inline status): src/scripts/web3forms.ts.
+ */
+import Icon from '@/components/ui/Icon.astro';
+
+interface Props {
+  /** e-mail subject the company receives */
+  subject: string;
+  /** sender name shown in the inbox, e.g. "BUDUJE GRUPA — kosztorys" */
+  fromName: string;
+  submitLabel: string;
+  consent: string;
+  consentError: string;
+  /** message after a successful send (default: the generic thank-you in web3forms.ts) */
+  success?: string;
+  note?: string;
+  class?: string;
+}
+const { subject, fromName, submitLabel, consent, consentError, success, note, class: className } = Astro.props;
+
+const accessKey = import.meta.env.PUBLIC_WEB3FORMS_KEY;
+if (!accessKey) console.warn('[forms] PUBLIC_WEB3FORMS_KEY is not set — forms will not deliver messages.');
+---
+
+<form
+  class:list={['form', className]}
+  action="https://api.web3forms.com/submit"
+  method="POST"
+  novalidate
+  data-web3form
+  data-success={success}
+>
+  <input type="hidden" name="access_key" value={accessKey} />
+  <input type="hidden" name="subject" value={subject} />
+  <input type="hidden" name="from_name" value={fromName} />
+  <input type="checkbox" name="botcheck" class="form__hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+  <slot />
+
+  <label class="consent">
+    <input type="checkbox" name="consent" value="Tak" required />
+    <span class="consent__box" aria-hidden="true"><Icon name="check" /></span>
+    <span class="consent__text">{consent} *</span>
+  </label>
+  <p class="field__error" data-error-for="consent">{consentError}</p>
+
+  <div class="form__footer">
+    <button type="submit" class="btn form__submit" data-submit><span data-submit-label>{submitLabel}</span></button>
+    <p class="form__status" role="status" aria-live="polite" data-status></p>
+    <slot name="after-submit" />
+    {note && <p class="form__note">{note}</p>}
+  </div>
+</form>
+
+<script>
+  import { initWeb3Forms } from '@/scripts/web3forms';
+  initWeb3Forms();
+</script>

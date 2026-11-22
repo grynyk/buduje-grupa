@@ -1,0 +1,100 @@
+{
+  "seo": {
+    "title": "Technologia — dom w konstrukcji szkieletowej | BUDUJE GRUPA",
+    "description": "Jak zbudowana jest ściana domu szkieletowego i dlaczego szkielet drewniany jest ciepły, szybki i ekologiczny."
+  },
+  "prefooter": "visit",
+  "blocks": [
+    {
+      "_template": "pageHero",
+      "layout": "split",
+      "eyebrow": "Technologia",
+      "title": "Ciepło zaczyna się w przekroju ściany.",
+      "text": "Budujemy domy całoroczne w konstrukcji szkieletowej z suszonego drewna KVH. Pokazujemy, jak powstaje dom i z czego składa się jego ściana — warstwa po warstwie.",
+      "image": "/images/wiezba-dachowa.jpg"
+    },
+    {
+      "_template": "layers",
+      "eyebrow": "Od wnętrza do elewacji",
+      "items": [
+        {
+          "name": "Płyta gipsowo-kartonowa",
+          "text": "Gładka ściana gotowa do malowania.",
+          "color": "#edede8",
+          "width": 26
+        },
+        {
+          "name": "Przestrzeń instalacyjna",
+          "text": "Kable i rury bez przebijania izolacji.",
+          "color": "#d9d6cc",
+          "width": 20
+        },
+        {
+          "name": "Paroizolacja",
+          "text": "Chroni konstrukcję przed wilgocią z wnętrza.",
+          "color": "#8c9e94",
+          "width": 8
+        },
+        {
+          "name": "Konstrukcja z drewna KVH + wełna",
+          "text": "Suszone drewno i gruba warstwa izolacji.",
+          "color": "#dbbd8c",
+          "width": 112
+        },
+        {
+          "name": "Płyta OSB / poszycie",
+          "text": "Usztywnia ścianę i zamyka konstrukcję.",
+          "color": "#c7a87a",
+          "width": 27
+        },
+        {
+          "name": "Wiatroizolacja",
+          "text": "Zatrzymuje wiatr, przepuszcza parę wodną.",
+          "color": "#8c9e94",
+          "width": 8
+        },
+        {
+          "name": "Elewacja drewniana lub tynk",
+          "text": "Wykończenie zgodne z projektem.",
+          "color": "#5c4533",
+          "width": 64
+        }
+      ]
+    },
+    {
+      "_template": "features",
+      "eyebrow": "Dlaczego szkielet drewniany",
+      "theme": "paper",
+      "items": [
+        {
+          "icon": "calendar",
+          "title": "Sucha budowa",
+          "text": "Bez wylewania i schnięcia ścian. Brak przerw technologicznych pozwala budować o każdej porze roku."
+        },
+        {
+          "icon": "thermometer",
+          "title": "Ciepło",
+          "text": "Izolacja wypełnia grubość konstrukcji, a nie tylko leży na niej — ściana jest cienka, a dom ciepły."
+        },
+        {
+          "icon": "clock",
+          "title": "Szybkość",
+          "text": "Stan surowy zamknięty w ciągu kilku tygodni. Szybciej się wprowadzasz i krócej płacisz za budowę."
+        },
+        {
+          "icon": "leaf",
+          "title": "Ekologia",
+          "text": "Drewno to naturalny, odnawialny materiał, który magazynuje węgiel i tworzy zdrowy mikroklimat wnętrz."
+        }
+      ],
+      "layout": "split",
+      "numbered": true,
+      "title": "Cztery powody, by budować w szkielecie.",
+      "text": "Konstrukcja szkieletowa łączy ciepło, szybkość i naturalny materiał. Tak budujemy domy całoroczne — od płyty fundamentowej po dach.",
+      "link": {
+        "label": "Porozmawiajmy o Twoim domu",
+        "href": "/kontakt"
+      }
+    }
+  ]
+}

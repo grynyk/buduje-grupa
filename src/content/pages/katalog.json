@@ -1,0 +1,19 @@
+{
+  "seo": {
+    "title": "Katalog projektów domów szkieletowych | BUDUJE GRUPA",
+    "description": "Gotowe projekty domów szkieletowych, które dopasujemy do Twojej działki."
+  },
+  "prefooter": "custom",
+  "blocks": [
+    {
+      "_template": "pageHero",
+      "layout": "split",
+      "eyebrow": "Katalog projektów",
+      "title": "Wybierz dom. Dopasujemy go do działki.",
+      "text": "Gotowe projekty, które możemy zmodyfikować — przesunąć ściany, dodać pokój, garaż lub taras."
+    },
+    {
+      "_template": "catalog"
+    }
+  ]
+}

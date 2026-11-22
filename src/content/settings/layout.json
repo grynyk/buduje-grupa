@@ -1,0 +1,83 @@
+{
+  "nav": [
+    {
+      "label": "O nas",
+      "href": "/o-nas",
+      "header": true
+    },
+    {
+      "label": "Oferta",
+      "href": "/oferta",
+      "header": true
+    },
+    {
+      "label": "Realizacje",
+      "href": "/realizacje",
+      "header": true
+    },
+    {
+      "label": "Katalog",
+      "href": "/katalog",
+      "header": true
+    },
+    {
+      "label": "Technologia",
+      "href": "/technologia",
+      "header": false
+    },
+    {
+      "label": "Proces budowy",
+      "href": "/proces-budowy",
+      "header": true
+    },
+    {
+      "label": "Poradnik inwestora",
+      "href": "/poradnik-inwestora",
+      "header": true
+    },
+    {
+      "label": "Gwarancja",
+      "href": "/gwarancja",
+      "header": false
+    },
+    {
+      "label": "Finansowanie",
+      "href": "/finansowanie",
+      "header": false
+    },
+    {
+      "label": "Kontakt",
+      "href": "/kontakt",
+      "header": true
+    }
+  ],
+  "cta": {
+    "label": "Bezpłatna wycena",
+    "href": "/kontakt"
+  },
+  "prefooter": {
+    "quote": {
+      "title": "„Budujemy tak, jakbyśmy budowali dla siebie.”",
+      "button": {
+        "label": "Poznajmy się",
+        "href": "/kontakt"
+      }
+    },
+    "visit": {
+      "title": "Chcesz zobaczyć dom na żywo?",
+      "text": "Umówimy wizytę na budowie lub w zamieszkanym już domu.",
+      "button": {
+        "label": "Umów wizytę",
+        "href": "/kontakt"
+      }
+    },
+    "custom": {
+      "title": "Nie znalazłeś swojego domu?",
+      "text": "Zaprojektujemy go od zera — razem z Tobą.",
+      "button": {
+        "label": "Projekt indywidualny",
+        "href": "/kontakt"
+      }
+    }
+  }
+}

@@ -8,7 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "check": "astro check"
+    "check": "astro check && node scripts/check-cms.mjs",
+    "check:cms": "astro sync && node scripts/check-cms.mjs"
   },
   "packageManager": "yarn@4.18.1",
   "dependencies": {
@@ -21,6 +22,7 @@
     "@astrojs/check": "^0.9.12",
     "@types/node": "^26.6.6",
     "sass": "^1.108.2",
-    "typescript": "^6"
+    "typescript": "^6",
+    "yaml": "^2.9.1"
   }
 }

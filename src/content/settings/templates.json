@@ -1,0 +1,27 @@
+{
+  "project": {
+    "prefooter": "visit",
+    "askTitle": "Interesuje Cię podobny dom?",
+    "askText": "Opowiedz nam o swojej działce — przygotujemy wycenę i harmonogram.",
+    "askButton": "Zapytaj o podobny dom"
+  },
+  "catalog": {
+    "prefooter": "custom",
+    "eyebrow": "Projekt domu",
+    "askTitle": "Podoba Ci się ten projekt?",
+    "askText": "Wycenimy go w wybranym standardzie i dopasujemy do Twojej działki.",
+    "askButton": "Zapytaj o ten projekt",
+    "standards": [
+      "Stan surowy zamknięty",
+      "Stan deweloperski",
+      "Pod klucz"
+    ],
+    "modificationsTitle": "Co możemy zmienić",
+    "modifications": [
+      "Przesunięcie ścian i zmiana układu pomieszczeń",
+      "Dodatkowy pokój lub antresola",
+      "Garaż w bryle lub wolnostojący",
+      "Taras, zadaszenie i większe przeszklenia"
+    ]
+  }
+}

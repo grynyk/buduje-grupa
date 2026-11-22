@@ -1,0 +1,79 @@
+{
+  "seo": {
+    "title": "Finansowanie budowy domu | BUDUJE GRUPA",
+    "description": "Płatności etapami, kredyt hipoteczny i dofinansowania. Pomagamy zaplanować finansowanie budowy domu szkieletowego."
+  },
+  "prefooter": "custom",
+  "blocks": [
+    {
+      "_template": "pageHero",
+      "layout": "split",
+      "eyebrow": "Finansowanie",
+      "title": "Płacisz za to, co już stoi.",
+      "text": "Pomagamy zaplanować finansowanie tak, aby inwestycja była bezpieczna i przewidywalna."
+    },
+    {
+      "_template": "schedule",
+      "eyebrow": "Harmonogram płatności — przykład",
+      "stages": [
+        {
+          "label": "Projekt",
+          "value": "[%]",
+          "weight": 16
+        },
+        {
+          "label": "Fundamenty",
+          "value": "[%]",
+          "weight": 20
+        },
+        {
+          "label": "Stan surowy",
+          "value": "[%]",
+          "weight": 34
+        },
+        {
+          "label": "Instalacje",
+          "value": "[%]",
+          "weight": 23
+        },
+        {
+          "label": "Wykończenie",
+          "value": "[%]",
+          "weight": 29
+        }
+      ]
+    },
+    {
+      "_template": "features",
+      "columns": 3,
+      "theme": "light",
+      "items": [
+        {
+          "title": "Kredyt hipoteczny",
+          "text": "Banki finansują dom szkieletowy na takich samych zasadach jak murowany. Przygotujemy kosztorys i harmonogram dla banku."
+        },
+        {
+          "title": "Płatności etapami",
+          "text": "Każda transza po odbiorze etapu — zgodnie z harmonogramem w umowie."
+        },
+        {
+          "title": "Dofinansowania",
+          "text": "Doradzimy, z jakich programów wsparcia możesz skorzystać, np. na pompę ciepła, fotowoltaikę czy rekuperację."
+        }
+      ]
+    },
+    {
+      "_template": "estimate",
+      "anchor": "kosztorys",
+      "eyebrow": "Wstępny kosztorys",
+      "title": "Ile może kosztować Twój dom?",
+      "text": "Podaj metraż i standard — przygotujemy kosztorys w ciągu kilku dni roboczych.",
+      "standards": [
+        "Stan surowy zamknięty",
+        "Stan deweloperski",
+        "Pod klucz"
+      ],
+      "buttonLabel": "Poproś o kosztorys"
+    }
+  ]
+}

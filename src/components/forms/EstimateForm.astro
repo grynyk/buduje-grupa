@@ -1,0 +1,35 @@
+---
+/** "Ile może kosztować Twój dom?" — cost-estimate request. */
+import Field from './Field.astro';
+import Web3Form from './Web3Form.astro';
+
+interface Props {
+  standards: string[];
+  buttonLabel?: string;
+  /** prefix for element ids (unique per page) */
+  id?: string;
+}
+const { standards, buttonLabel = 'Poproś o kosztorys', id = 'est' } = Astro.props;
+---
+
+<Web3Form
+  subject="Prośba o wstępny kosztorys — buduje-grupa.eu"
+  fromName="BUDUJE GRUPA — kosztorys"
+  submitLabel={buttonLabel}
+  success="Dziękujemy! Kosztorys przygotujemy w ciągu kilku dni roboczych."
+  consent="Wyrażam zgodę na przetwarzanie moich danych w celu przygotowania kosztorysu."
+  consentError="Zgoda jest wymagana."
+>
+  <div class="form__grid">
+    <Field id={`${id}-area`} name="area" label="Metraż" error="Podaj przybliżony metraż." type="text" inputmode="numeric" placeholder="np. 120 m²" required />
+    <div class="field">
+      <label for={`${id}-standard`} class="form__label">Standard</label>
+      <select id={`${id}-standard`} name="standard">
+        {standards.map((s, i) => <option selected={i === standards.length - 1}>{s}</option>)}
+      </select>
+    </div>
+    <Field id={`${id}-location`} name="location" label="Lokalizacja działki" type="text" placeholder="Miejscowość" full />
+    <Field id={`${id}-name`} name="name" label="Imię i nazwisko" error="Podaj imię i nazwisko." type="text" autocomplete="name" required minlength="2" />
+    <Field id={`${id}-email`} name="email" label="E-mail" error="Podaj poprawny adres e-mail." type="email" autocomplete="email" required />
+  </div>
+</Web3Form>

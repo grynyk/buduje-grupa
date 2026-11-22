@@ -1,0 +1,85 @@
+---
+/**
+ * Contact form. Layout follows the brand "Napisz do nas" card:
+ * name + phone, e-mail, topic (free text with suggestions), message, consent, full-width submit.
+ * Pre-filled from ?projekt= / ?realizacja= links (see web3forms.ts → prefill).
+ */
+import Field from './Field.astro';
+import Web3Form from './Web3Form.astro';
+
+interface Props {
+  /** label above the topic field, e.g. "Temat" */
+  topicLabel?: string;
+  /** topic suggestions; empty = no topic field */
+  topics?: string[];
+  note?: string;
+  /** prefix for element ids (unique per page) */
+  id?: string;
+}
+const { topicLabel = 'Temat', topics = [], note, id = 'cf' } = Astro.props;
+---
+
+<Web3Form
+  subject="Nowe zapytanie ze strony buduje-grupa.eu"
+  fromName="BUDUJE GRUPA — formularz"
+  submitLabel="Wyślij wiadomość"
+  consent="Wyrażam zgodę na przetwarzanie moich danych w celu odpowiedzi na zapytanie."
+  consentError="Zgoda jest wymagana, abyśmy mogli odpowiedzieć."
+  note={note}
+>
+  <div class="form__grid">
+    <Field id={`${id}-name`} name="name" label="Imię i nazwisko" error="Podaj imię i nazwisko." type="text" autocomplete="name" placeholder="Jan Kowalski" required minlength="2" />
+    <Field id={`${id}-phone`} name="phone" label="Telefon" type="tel" autocomplete="tel" inputmode="tel" placeholder="+48" />
+    <Field id={`${id}-email`} name="email" label="E-mail" error="Podaj poprawny adres e-mail." type="email" autocomplete="email" placeholder="twoj@email.pl" required full />
+  </div>
+
+  {
+    topics.length > 0 && (
+      // Free-text topic with a custom suggestion dropdown (ARIA combobox): type anything,
+      // or pick a suggestion. The list is as wide as the field and filters as you type.
+      <div class="field form__topic">
+        <label for={`${id}-topic`} class="form__label">
+          {topicLabel}
+        </label>
+        <div class="combo" data-combo>
+          <input
+            id={`${id}-topic`}
+            name="temat"
+            type="text"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded="false"
+            aria-controls={`${id}-topics`}
+            autocomplete="off"
+            placeholder="Wybierz z listy lub wpisz własny temat"
+            maxlength="120"
+            data-topic-input
+          />
+          <button type="button" class="combo__toggle" tabindex="-1" aria-label="Pokaż podpowiedzi" data-combo-toggle>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+          <ul id={`${id}-topics`} class="combo__list" role="listbox" aria-label={topicLabel} hidden data-combo-list>
+            {topics.map((t, i) => (
+              <li id={`${id}-topics-${i}`} class="combo__option" role="option" aria-selected="false" data-value={t}>
+                {t}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    )
+  }
+
+  <Field
+    id={`${id}-message`}
+    name="message"
+    label="Wiadomość"
+    error="Napisz kilka słów (min. 10 znaków)."
+    rows={4}
+    required
+    minlength="10"
+    placeholder="Kilka słów o domu, który planujesz…"
+  />
+</Web3Form>

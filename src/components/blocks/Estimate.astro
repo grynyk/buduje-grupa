@@ -1,12 +1,12 @@
 ---
-import type { BlockOf } from '@/content.config';
-import EstimateForm from '@/components/EstimateForm.astro';
+import type { BlockOf } from '@/schemas/blocks';
+import EstimateForm from '@/components/forms/EstimateForm.astro';
 
 type Props = BlockOf<'estimate'>;
 const { eyebrow, title, text, standards, buttonLabel } = Astro.props;
 ---
 
-<section class="section estimate theme-light" id="kosztorys">
+<section class="section estimate theme-light">
   <div class="container estimate__grid">
     <div class="estimate__intro">
       {eyebrow && <p class="eyebrow" data-reveal>{eyebrow}</p>}

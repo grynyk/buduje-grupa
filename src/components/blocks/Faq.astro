@@ -1,25 +1,23 @@
 ---
-import type { BlockOf } from '@/content.config';
+/**
+ * Questions & answers (<details>), optional side card and photo.
+ * heading h1 = opens the page · h2 = a section further down. Also emitted as FAQPage JSON-LD (lib/seo.ts).
+ */
+import Title from '@/components/ui/Title.astro';
+import Img from '@/components/ui/Img.astro';
+import { fadeIn } from '@/lib/motion';
+import type { BlockOf } from '@/schemas/blocks';
 
 type Props = BlockOf<'faq'>;
 const { eyebrow, title, items, aside, image, heading } = Astro.props;
-const H = heading;
 const top = heading === 'h1';
 ---
 
 <section class:list={['faq theme-light', { 'faq--top': top }]} data-hero={top ? '' : undefined}>
   <div class:list={['container faq__grid', { 'faq__grid--full': !aside && !image }]}>
     <div class="faq__main">
-      {eyebrow && <p class="eyebrow" data-hero-fade={top ? '' : undefined} data-reveal={top ? undefined : ''}>{eyebrow}</p>}
-      {
-        title && (
-          <H class="faq__title">
-            <span class="faq__line">
-              <span data-hero-line={top ? '' : undefined} data-split={top ? undefined : ''}>{title}</span>
-            </span>
-          </H>
-        )
-      }
+      {eyebrow && <p class="eyebrow" {...fadeIn(top)}>{eyebrow}</p>}
+      {title && <Title as={heading} text={title} class="faq__title" />}
       <div class="faq__list" data-reveal-stagger>
         {
           items.map((item, i) => (
@@ -52,7 +50,7 @@ const top = heading === 'h1';
           )}
           {image && (
             <figure class="faq__image">
-              <img src={image} alt="" loading="lazy" width="1536" height="864" />
+              <Img src={image} sizes="(min-width: 1024px) 50vw, 100vw" alt="" loading="lazy" width="1536" height="864" />
             </figure>
           )}
         </aside>
@@ -67,7 +65,7 @@ const top = heading === 'h1';
   }
 
   .faq--top {
-    padding-top: calc(var(--header-h) + clamp(3.5rem, 7vw, 6.5rem));
+    padding-top: var(--page-top);
   }
 
   .faq__grid {
@@ -92,21 +90,10 @@ const top = heading === 'h1';
     gap: 1.5rem;
   }
 
-  .faq__title {
+  .faq :global(.faq__title) {
     @include display(var(--fs-h1));
     line-height: 1.05;
     max-width: 14ch;
-  }
-
-  .faq__line {
-    display: block;
-    overflow: hidden;
-    padding-block: 0.08em;
-    margin-block: -0.08em;
-
-    > span {
-      display: block;
-    }
   }
 
   .faq__list {

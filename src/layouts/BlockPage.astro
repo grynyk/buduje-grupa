@@ -1,0 +1,39 @@
+---
+/** A page from src/content/pages/*.json: SEO + its list of blocks (CMS → Strony). */
+import BaseLayout from './BaseLayout.astro';
+import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
+import { getLayout, pagePath, type Page } from '@/lib/content';
+import { faqPage, firstImage } from '@/lib/seo';
+import type { Block } from '@/schemas/blocks';
+
+interface Props {
+  page: Page;
+}
+const { page } = Astro.props;
+const { seo, prefooter, blocks } = page.data;
+
+// Header floats transparent over a photo / green opener; otherwise it is the white bar.
+const isDarkOpener = (b?: Block) =>
+  b?._template === 'hero' || (b?._template === 'pageHero' && (b.layout === 'image-bg' || b.layout === 'dark'));
+
+// A beige last section → white band above the footer, so the two beige areas don't merge.
+const last = blocks.at(-1);
+const prefooterLight = !!last && 'theme' in last && last.theme === 'paper';
+
+// Sub-pages get a one-step breadcrumb named like the menu item (home itself and the 404 page don't).
+const { nav } = await getLayout();
+const opener = blocks.find((b) => b._template === 'pageHero');
+const crumbLabel = nav.find((n) => n.href === pagePath(page.id))?.label ?? opener?.title ?? seo.title;
+const crumbs = page.id === 'index' || page.id === '404' ? undefined : [{ label: crumbLabel }];
+---
+
+<BaseLayout
+  seo={{ ...seo, image: seo.image ?? firstImage(blocks) }}
+  header={isDarkOpener(blocks[0]) ? 'overlay' : 'solid'}
+  prefooter={prefooter}
+  prefooterLight={prefooterLight}
+  crumbs={crumbs}
+  jsonLd={[faqPage(blocks)]}
+>
+  <BlockRenderer blocks={blocks} />
+</BaseLayout>

@@ -1,0 +1,81 @@
+---
+/** Endless strip of short phrases; speeds up and reverses with the scroll (animations.ts → marquee). */
+import type { BlockOf } from '@/schemas/blocks';
+
+type Props = BlockOf<'marquee'>;
+const { items } = Astro.props;
+// Duplicated once so the loop can translate by exactly one set width.
+const sets = [0, 1];
+---
+
+{
+  items.length > 0 && (
+    <div class="marquee" data-marquee>
+      <p class="sr-only">{items.join(', ')}</p>
+      <div class="marquee__track" data-marquee-track aria-hidden="true">
+        {sets.map(() => (
+          <ul role="list" class="marquee__set">
+            {items.map((item) => (
+              <li class="marquee__item">
+                <span>{item}</span>
+                <svg viewBox="0 0 20 20" width="20" height="20" class="marquee__sep">
+                  <rect x="4" y="4" width="12" height="12" transform="rotate(45 10 10)" />
+                </svg>
+              </li>
+            ))}
+          </ul>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+<style lang="scss">
+  .marquee {
+    background: var(--c-paper);
+    color: var(--c-green);
+    border-block: 1px solid var(--line);
+    overflow: hidden;
+    padding-block: clamp(1.25rem, 2.4vw, 2rem);
+    position: relative;
+  }
+
+  .marquee__track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+  }
+
+  .marquee__set {
+    display: flex;
+    flex: none;
+  }
+
+  .marquee__item {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.5rem, 3vw, 3rem);
+    padding-right: clamp(1.5rem, 3vw, 3rem);
+    white-space: nowrap;
+    @include display(clamp(1.5rem, 1rem + 2vw, 2.75rem));
+  }
+
+  .marquee__sep {
+    width: 0.3em;
+    height: 0.3em;
+    fill: var(--c-wood-2);
+  }
+
+  // CSS-only fallback when GSAP is not driving the track
+  @include motion-ok {
+    :global(html.no-anim) .marquee__track {
+      animation: marquee 40s linear infinite;
+    }
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+</style>

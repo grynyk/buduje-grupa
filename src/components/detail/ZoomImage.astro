@@ -1,6 +1,8 @@
 ---
 /** Image that opens in the page <Lightbox />. Without JS it links to the file. */
-import Icon from '@/components/Icon.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Img from '@/components/ui/Img.astro';
+import { fullSize } from '@/lib/images';
 
 interface Props {
   src: string;
@@ -11,10 +13,12 @@ interface Props {
   class?: string;
 }
 const { src, alt, variant = 'photo', eager = false, class: className } = Astro.props;
+const sizes = { cover: '100vw', wide: '100vw', photo: '(min-width: 768px) 50vw, 100vw', plan: '(min-width: 768px) 50vw, 100vw' }[variant];
+const href = await fullSize(src);
 ---
 
-<a href={src} class:list={['zoom', `zoom--${variant}`, className]} data-lightbox-item aria-label={`Powiększ: ${alt}`}>
-  <img src={src} alt={alt} width="1024" height="1280" loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : undefined} />
+<a href={href} class:list={['zoom', `zoom--${variant}`, className]} data-lightbox-item aria-label={`Powiększ: ${alt}`}>
+  <Img src={src} alt={alt} sizes={sizes} width="1024" height="1280" loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : undefined} />
   <span class="zoom__icon" aria-hidden="true"><Icon name="plus" /></span>
 </a>
 
