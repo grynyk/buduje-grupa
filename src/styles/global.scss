@@ -47,7 +47,7 @@
   --danger: #b3261e; // form errors only (functional, not brand)
 
   // photo overlays
-  --shade: 3 30 21; // rgb triplet, use as rgb(var(--shade) / a)
+  --shade: 22 24 26; // neutral graphite (no green cast) — rgb triplet, use as rgb(var(--shade) / a)
 
   // type — Inter throughout: Light for headings, Regular/Medium for text and labels
   --f-display: 'Inter Variable', 'Inter Fallback', sans-serif;
