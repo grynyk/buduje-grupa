@@ -11,7 +11,7 @@ const { title, text, image, button } = Astro.props;
 
 <section class="cta theme-dark">
   <div class="cta__media" aria-hidden="true">
-    <img src={image} alt="" loading="lazy" width="1536" height="864" data-parallax="-12" />
+    <img src={image} alt="" loading="lazy" width="1536" height="864" data-parallax="18" />
   </div>
   <div class="cta__inner container">
     <h2 class="cta__title" data-split>{title}</h2>
@@ -38,9 +38,11 @@ const { title, text, image, button } = Astro.props;
     }
   }
 
+  // Parallax: the photo lags behind the scroll (data-parallax="18" → moves −18% → +18% of its height).
+  // The layer overhangs the section by 30% top and bottom; 18% × 1.6 (its height) < 30%, so no edge ever shows.
   .cta__media {
     position: absolute;
-    inset: -12% 0;
+    inset: -30% 0;
     z-index: -2;
 
     img {

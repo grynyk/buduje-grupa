@@ -19,6 +19,8 @@ interface Props {
   header?: 'overlay' | 'solid';
   /** Beige band above the footer. Default: "quote" on every page except home (none). */
   prefooter?: PrefooterVariant;
+  /** White prefooter instead of beige (used when the last section above it is beige). */
+  prefooterLight?: boolean;
 }
 
 const settings = await getSettings();
@@ -93,7 +95,7 @@ const business = {
     <Header settings={settings} variant={header} />
     <main id="main">
       <slot />
-      {prefooter !== 'none' && <PreFooter variant={prefooter} />}
+      {prefooter !== 'none' && <PreFooter variant={prefooter} light={Astro.props.prefooterLight} />}
     </main>
     <Footer settings={settings} wordmark={isHome} />
 

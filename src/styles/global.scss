@@ -327,6 +327,12 @@ p {
     width: 100%;
   }
 
+  // Beside a .display (h2-size) heading in a bottom-aligned row: lifts the button so its bottom edge
+  // sits on the heading's baseline, not on the descender space below it (Inter, line-height 1.08).
+  &--baseline {
+    margin-bottom: calc(var(--fs-h2) * 0.177);
+  }
+
   // small phones: a long label wraps instead of being clipped
   @include down(sm) {
     white-space: normal;
@@ -430,6 +436,13 @@ p {
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
+}
+
+/* Line masks from SplitText ([data-split] headings): the mask is one line-height tall,
+   but tails (y j ą ę) and accents (Ź Ó) reach outside it — pad it, then cancel the extra space. */
+.split-line-mask {
+  padding-block: 0.15em;
+  margin-block: -0.15em;
 }
 
 /* ============ Animation pre-states ============

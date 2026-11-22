@@ -31,7 +31,7 @@ function hero() {
   const lines = $$('[data-hero-line]', root);
   const fades = $$('[data-hero-fade]', root);
   const badges = $$('[data-hero-badge]', root);
-  if (lines.length) tl.fromTo(lines, { yPercent: 110, opacity: 1 }, { yPercent: 0, duration: 1.3, stagger: 0.09 }, 0.25);
+  if (lines.length) tl.fromTo(lines, { yPercent: 125, opacity: 1 }, { yPercent: 0, duration: 1.3, stagger: 0.09 }, 0.25);
   if (fades.length) tl.fromTo(fades, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 1.1, stagger: 0.08 }, 0.75);
   if (badges.length) tl.fromTo(badges, { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.08 }, 0.95);
 
@@ -101,11 +101,12 @@ function splitHeadings() {
     SplitText.create(el, {
       type: 'lines',
       mask: 'lines',
+      linesClass: 'split-line', // masks get .split-line-mask (padded in global.scss so descenders aren't clipped)
       autoSplit: true, // re-splits on resize / font load
       onSplit(self) {
         gsap.set(el, { visibility: 'visible' });
         return gsap.from(self.lines, {
-          yPercent: 105,
+          yPercent: 125, // clears the mask's extra padding
           duration: 1.2,
           ease: EASE,
           stagger: 0.08,

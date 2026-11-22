@@ -5,9 +5,10 @@
   },
   "prefooter": "visit",
   "hero": {
-    "layout": "image-bg",
+    "layout": "split",
     "eyebrow": "Technologia",
     "title": "Ciepło zaczyna się w przekroju ściany.",
+    "text": "Budujemy domy całoroczne w konstrukcji szkieletowej z suszonego drewna KVH. Pokazujemy, jak powstaje dom i z czego składa się jego ściana — warstwa po warstwie.",
     "image": "/images/wiezba-dachowa.jpg"
   },
   "blocks": [
@@ -62,7 +63,7 @@
     {
       "_template": "features",
       "eyebrow": "Dlaczego szkielet drewniany",
-      "theme": "dark",
+      "theme": "paper",
       "items": [
         {
           "icon": "calendar",

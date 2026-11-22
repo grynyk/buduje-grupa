@@ -24,6 +24,12 @@ const isDark = (hex: string) => {
             data-layer={i}
           >
             <span class="layers__stripe-num">{i + 1}</span>
+            <span
+              class:list={['layers__tip', { 'is-start': i === 0, 'is-end': i === items.length - 1 }]}
+              aria-hidden="true"
+            >
+              {i + 1}. {l.name}
+            </span>
           </span>
         ))
       }
@@ -72,19 +78,20 @@ const isDark = (hex: string) => {
     display: grid;
     gap: clamp(2.5rem, 6vw, 8rem);
 
+    // the diagram spans exactly the list: top on the eyebrow, bottom on the last row's rule
     @include up(lg) {
       grid-template-columns: minmax(16rem, 0.8fr) 1fr;
-      align-items: start;
+      align-items: stretch;
     }
   }
 
   .layers__diagram {
     display: flex;
-    height: clamp(18rem, 32vw, 22rem);
+    height: clamp(16rem, 60vw, 22rem);
 
     @include up(lg) {
-      position: sticky;
-      top: calc(var(--header-h) + 2rem);
+      height: auto;
+      min-height: 22rem;
     }
   }
 
@@ -92,36 +99,121 @@ const isDark = (hex: string) => {
     position: relative;
     flex: 0 0 var(--w);
     background: var(--c);
-    transition: opacity 0.3s;
+    transition:
+      opacity 0.3s,
+      box-shadow 0.3s;
+
+    // pointer under the tooltip
+    &::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 0.35rem);
+      border: 0.35rem solid transparent;
+      border-bottom: 0;
+      border-top-color: var(--c-green);
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+  }
+
+  // highlighted layer: green frame drawn outside, so even the thin stripes read clearly
+  .layers__stripe.is-active {
+    z-index: 1;
+    box-shadow: 0 0 0 2px var(--c-green);
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  // layer name above the diagram
+  .layers__tip {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 0.7rem);
+    z-index: 2;
+    padding: 0.45rem 0.7rem;
+    background: var(--c-green);
+    color: var(--c-white);
+    @include label;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, 0.25rem);
+    transition:
+      opacity 0.25s,
+      transform 0.25s var(--ease-out);
+
+    // first / last stripe: keep the tooltip inside the diagram's width
+    &.is-start {
+      left: 0;
+      transform: translate(0, 0.25rem);
+    }
+
+    &.is-end {
+      left: auto;
+      right: 0;
+      transform: translate(0, 0.25rem);
+    }
+  }
+
+  .layers__stripe.is-active .layers__tip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+
+    &.is-start,
+    &.is-end {
+      transform: none;
+    }
   }
 
   .layers__stripe-num {
     position: absolute;
     left: 50%;
-    bottom: 0.75rem;
+    bottom: 1rem;
     transform: translateX(-50%);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
     color: var(--c-green);
+    opacity: 0.7;
   }
 
   .layers__stripe.is-dark .layers__stripe-num {
     color: var(--c-white);
+    opacity: 0.9;
   }
 
+  .layers__stripe.is-active .layers__stripe-num {
+    opacity: 1;
+    font-weight: 600;
+  }
+
+  // keep the section readable while one layer is highlighted
   .layers__stripe.is-dim {
-    opacity: 0.35;
+    opacity: 0.45;
   }
 
+  // full-width rule — doubles as the first row's top border
   .layers__eyebrow {
-    padding-bottom: 0.5rem;
+    display: block;
+    padding: 0 var(--row-pad) 1rem;
     border-bottom: 1px solid var(--line);
+  }
+
+  .layers__list,
+  .layers__eyebrow {
+    --row-pad: 1rem;
   }
 
   .layer {
     display: grid;
-    grid-template-columns: 1.5rem 1fr;
+    grid-template-columns: 2rem 1fr;
+    align-items: baseline; // number sits on the name's baseline
     gap: 0.5rem;
-    padding-block: 1rem;
+    padding: 1.25rem var(--row-pad);
     border-bottom: 1px solid var(--line);
     cursor: default;
     outline-offset: -1px;
@@ -130,12 +222,15 @@ const isDark = (hex: string) => {
 
   .layer.is-active {
     background: var(--c-paper);
+    box-shadow: inset 2px 0 0 var(--c-green); // matches the stripe's frame
   }
 
   .layer__num {
     @include display(1.25rem);
-    font-weight: 200;
-    line-height: 1.1;
+    font-weight: 300;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
   }
 
   .layer__name {
@@ -144,7 +239,7 @@ const isDark = (hex: string) => {
   }
 
   .layer__text {
-    margin-top: 0.25rem;
+    margin-top: 0.35rem;
     font-size: var(--fs-small);
     color: var(--muted);
   }

@@ -18,7 +18,7 @@ const { intro, projects, total } = Astro.props;
         {intro.eyebrow && <p class="eyebrow" data-reveal>{intro.eyebrow}</p>}
         {intro.title && <h2 class="display projects__title" data-split>{intro.title}</h2>}
       </div>
-      <a href="/realizacje" class="btn btn--ghost projects__all" data-reveal>Wszystkie realizacje ({total})</a>
+      <a href="/realizacje" class="btn btn--ghost btn--baseline projects__all" data-reveal>Wszystkie realizacje ({total})</a>
     </header>
 
     <ul role="list" class="projects__row card-grid" data-reveal-stagger>

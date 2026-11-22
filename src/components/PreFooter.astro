@@ -1,6 +1,7 @@
 ---
 /**
- * Beige band above the footer (every page except home).
+ * Beige band above the footer (every page except home). Goes white (`light`) when the page's
+ * last section is already beige, so the two don't merge into one block.
  * Texts live in Ustawienia firmy → "Pasek nad stopką"; each page picks a variant.
  */
 import type { PrefooterVariant } from '@/content.config';
@@ -8,8 +9,9 @@ import { getSettings } from '@/lib/content';
 
 interface Props {
   variant: Exclude<PrefooterVariant, 'none'>;
+  light?: boolean;
 }
-const { variant } = Astro.props;
+const { variant, light = false } = Astro.props;
 const { prefooter } = await getSettings();
 const item = prefooter[variant];
 // no "go to Kontakt" button when we are already there
@@ -17,7 +19,7 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const showButton = item.button && item.button.href.replace(/\/+$/, '') !== path;
 ---
 
-<section class:list={['prefooter theme-paper', `prefooter--${variant}`]}>
+<section class:list={['prefooter', light ? 'theme-light' : 'theme-paper', `prefooter--${variant}`]}>
   <div class="container prefooter__inner">
     <div class="prefooter__copy">
       <p class="prefooter__title" data-split>{item.title}</p>
