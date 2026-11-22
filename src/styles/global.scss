@@ -1,6 +1,17 @@
 /* Fonts are imported in BaseLayout.astro (keeps their relative url() paths intact). */
 @use 'forms';
 
+// Stand-in shown for the few ms before Inter loads: Arial scaled to Inter's width and line metrics,
+// so text doesn't jump sideways (header nav) or reflow when Inter swaps in.
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial'), local('ArialMT'), local('Helvetica');
+  size-adjust: 107.12%;
+  ascent-override: 90.44%;
+  descent-override: 22.52%;
+  line-gap-override: 0%;
+}
+
 /* ============ Tokens ============ */
 :root {
   // ---- brand palette (BUDUJE GRUPA brand files) — the only colours used on the site ----
@@ -38,9 +49,9 @@
   // photo overlays
   --shade: 3 30 21; // rgb triplet, use as rgb(var(--shade) / a)
 
-  // type — Jost Light for headings, Archivo for text/labels
-  --f-display: 'Jost Variable', 'Jost', system-ui, sans-serif;
-  --f-body: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  // type — Inter throughout: Light for headings, Regular/Medium for text and labels
+  --f-display: 'Inter Variable', 'Inter Fallback', sans-serif;
+  --f-body: 'Inter Variable', 'Inter Fallback', sans-serif;
   --fs-hero: clamp(3rem, 1.2rem + 6.6vw, 7.5rem);
   --fs-h1: clamp(2.5rem, 1.5rem + 3.6vw, 4.75rem);
   --fs-h2: clamp(2rem, 1.35rem + 2.4vw, 3.5rem);
@@ -314,6 +325,14 @@ p {
 
   &--block {
     width: 100%;
+  }
+
+  // small phones: a long label wraps instead of being clipped
+  @include down(sm) {
+    white-space: normal;
+    text-align: center;
+    line-height: 1.3;
+    padding-block: 0.75rem;
   }
 
   &[disabled] {

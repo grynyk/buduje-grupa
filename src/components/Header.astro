@@ -1,6 +1,5 @@
 ---
 import Logo from './Logo.astro';
-import SocialLinks from './SocialLinks.astro';
 import { telHref, type Settings } from '@/lib/content';
 import { MAIN_NAV, isCurrent } from '@/lib/nav';
 
@@ -33,6 +32,11 @@ const path = Astro.url.pathname;
       </ul>
     </nav>
 
+    <div class="header__actions">
+      {settings.phone && <a href={telHref(settings.phone)} class="header__phone">{settings.phone}</a>}
+      <a href="/kontakt" class="btn header__cta">Bezpłatna wycena</a>
+    </div>
+
     <button class="header__burger" type="button" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
       <span class="sr-only">Menu</span>
       <span class="header__burger-lines" aria-hidden="true"><span></span><span></span></span>
@@ -53,9 +57,14 @@ const path = Astro.url.pathname;
         }
       </ul>
       <div class="menu__footer" data-menu-footer>
-        {settings.phone && <a href={telHref(settings.phone)}>{settings.phone}</a>}
-        {settings.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}
-        <SocialLinks socials={settings.socials} />
+        <a href="/kontakt" class="btn btn--block" data-menu-link>Bezpłatna wycena</a>
+        {
+          settings.phone && (
+            <a href={telHref(settings.phone)} class="btn btn--ghost btn--block menu__call">
+              Zadzwoń: {settings.phone}
+            </a>
+          )
+        }
       </div>
     </nav>
   </div>
@@ -136,6 +145,10 @@ const path = Astro.url.pathname;
       --fg: var(--c-green);
       --muted: rgb(6 52 36 / 0.72);
       --line: rgb(6 52 36 / 0.12);
+      --action: var(--c-green);
+      --action-fg: var(--c-white);
+      --action-sweep: var(--c-green-2);
+      --action-sweep-fg: var(--c-white);
       color: var(--fg);
       background: rgb(255 255 255 / 0.96);
       border-bottom-color: var(--line);
@@ -158,8 +171,9 @@ const path = Astro.url.pathname;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 2.5rem;
+    gap: clamp(1.25rem, 2vw, 2.5rem);
     height: var(--header-h);
+    --header-fs: clamp(0.8125rem, 0.6rem + 0.3vw, 0.9375rem);
   }
 
   // Bigger BG® mark, vertically centred with the nav
@@ -181,6 +195,7 @@ const path = Astro.url.pathname;
 
     @include up(xl) {
       display: block;
+      margin-left: auto;
     }
 
     ul {
@@ -194,11 +209,9 @@ const path = Astro.url.pathname;
     position: relative;
     display: block;
     padding-block: 0.5rem;
-    font-size: clamp(0.6875rem, 0.55rem + 0.22vw, 0.8125rem);
+    font-size: var(--header-fs);
     font-weight: 400;
     line-height: 1;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     white-space: nowrap;
 
     &::after {
@@ -224,6 +237,33 @@ const path = Astro.url.pathname;
         transform-origin: left;
       }
     }
+  }
+
+  // phone + quote button, right of the nav (desktop only — the mobile menu has its own)
+  .header__actions {
+    display: none;
+
+    @include up(xl) {
+      display: flex;
+      align-items: center;
+      gap: clamp(1.25rem, 2vw, 2rem);
+    }
+  }
+
+  .header__phone {
+    font-size: var(--header-fs);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 0.3s;
+
+    @include hover {
+      color: var(--accent);
+    }
+  }
+
+  .header__cta {
+    min-height: 2.75rem;
+    padding-inline: 1.25rem;
   }
 
   .header__burger {
@@ -299,16 +339,19 @@ const path = Astro.url.pathname;
     }
   }
 
+  // two full-width buttons pinned to the bottom of the menu
   .menu__footer {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 0.75rem;
-    color: var(--muted);
-    font-size: var(--fs-small);
 
-    :global(.socials) {
-      margin-top: 0.75rem;
-      color: var(--c-white);
+    .btn {
+      min-height: 3.5rem;
     }
+  }
+
+  .menu__call {
+    font-size: 0.9375rem;
+    letter-spacing: 0.01em;
+    text-transform: none;
   }
 </style>

@@ -566,17 +566,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fontsource-variable/archivo@npm:^5.3.0":
+"@fontsource-variable/inter@npm:^5.3.0":
   version: 5.3.0
-  resolution: "@fontsource-variable/archivo@npm:5.3.0"
-  checksum: 10c0/3af011f6ee09716625424c518bc9c4da93aa0989fc09904398451a125ef738d82af7d74569e195082dac6fc1df1c3a4aeba5d6d85f1a652245d001ed3aaf0c8c
-  languageName: node
-  linkType: hard
-
-"@fontsource-variable/jost@npm:^5.3.0":
-  version: 5.3.0
-  resolution: "@fontsource-variable/jost@npm:5.3.0"
-  checksum: 10c0/7af324be7aa2067e0b601e1c9d145f0b4fb76f53afe3a7d8c5967a675639f906544224a11412b4de14bc7a6f0168aada07472a9095ef468001e0022b24ec1ee5
+  resolution: "@fontsource-variable/inter@npm:5.3.0"
+  checksum: 10c0/46fbe41e8482a718f99634c8254346c6081d615415059be12e177224c903d688199125967825e75d4b8122668fd83f70880e11d4e02d08c20b503c65fe2a96d1
   languageName: node
   linkType: hard
 
@@ -1814,8 +1807,7 @@ __metadata:
   resolution: "buduje-grupa@workspace:."
   dependencies:
     "@astrojs/check": "npm:^0.9.12"
-    "@fontsource-variable/archivo": "npm:^5.3.0"
-    "@fontsource-variable/jost": "npm:^5.3.0"
+    "@fontsource-variable/inter": "npm:^5.3.0"
     "@types/node": "npm:^26.6.6"
     astro: "npm:^7.4.13"
     gsap: "npm:^3.15.1"

@@ -87,8 +87,8 @@ of the files, so Zod's `.optional()` / `.default()` apply).
 
 Logo, colours, photos and UI styles come from the BUDUJE GRUPA brand files; page layout and sections are this site's own.
 
-- Headings: **Jost Light**, sentence case (`@include display`)
-- Text: **Archivo**; labels/nav/buttons: tiny tracked uppercase (`@include label`, `.label`)
+- Headings: **Inter Light**, sentence case (`@include display`)
+- Text: **Inter**; labels/nav/buttons: tiny tracked uppercase (`@include label`, `.label`)
 - Section labels numbered: "01 — O nas"
 - Square buttons, hairline dividers, pill filters (`.pill`), white input boxes on paper cards
 - Backgrounds: white page, paper (`.theme-paper`) and green (`.theme-dark`) blocks

@@ -154,7 +154,7 @@ const { data, socials = [] } = Astro.props;
     @include up(lg) {
       grid-column: 8 / -1;
       // sit the buttons' bottom edge on the title's baseline (line box bottom − descender)
-      padding-bottom: calc(var(--hero-size) * 0.155); // measured Jost descender at this line-height
+      padding-bottom: calc(var(--hero-size) * 0.136); // Inter descender below the baseline at line-height 1
     }
   }
 
@@ -244,6 +244,7 @@ const { data, socials = [] } = Astro.props;
   .hero__stat {
     display: grid;
     gap: 0.35rem;
+    align-content: start; // labels line up even when a neighbour's wraps to two lines
 
     @include up(lg) {
       &:nth-child(1) {

@@ -1,6 +1,8 @@
 ---
-import '@fontsource-variable/jost/index.css';
-import '@fontsource-variable/archivo/index.css';
+import '@fontsource-variable/inter/index.css';
+// Preloaded so the first paint already uses Inter (latin + latin-ext covers Polish ą ę ł ś ż …)
+import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import interLatinExt from '@fontsource-variable/inter/files/inter-latin-ext-wght-normal.woff2?url';
 import '@/styles/global.scss';
 
 import Header from '@/components/Header.astro';
@@ -56,6 +58,8 @@ const business = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={interLatinExt} as="font" type="font/woff2" crossorigin />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonical} />

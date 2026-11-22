@@ -35,7 +35,7 @@ $breakpoints: (
   }
 }
 
-// Headings: Jost Light, sentence case
+// Headings: Inter Light, sentence case
 @mixin display($size: var(--fs-h2)) {
   font-family: var(--f-display);
   font-size: $size;
